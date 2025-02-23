@@ -1,0 +1,24 @@
+--------------------------------------------------------------------------------
+20250222
+
+today I prepare to write this application sqlite database manage
+first I create a maven project 
+then I download IntelliJ IDEA Community Edition 2024.3.3
+I use testNG and jdbc test sqlite connect and query table data
+I thought this application can use manage sqlite database 
+support multi-Language like chinese english french ET.
+
+I use my github account create this project 
+use github desktop version commit my project to github
+--------------------------------------------------------------------------------
+20250223
+
+today I download javafx sdk from website:https://jdk.java.net/javafx23/
+I search a lot of web page from google find solved method
+Write a new StartUI class then use this new class start ApplicationMainUI  
+then I run this boot class ,window and button show,very exciting.
+
+--------------------------------------------------------------------------------
+20250224
+
+
