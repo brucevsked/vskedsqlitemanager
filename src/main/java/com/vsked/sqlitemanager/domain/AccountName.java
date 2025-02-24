@@ -1,4 +1,4 @@
-package com.vsked.sqlitemanager.bo;
+package com.vsked.sqlitemanager.domain;
 
 public class AccountName {
 

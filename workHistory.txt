@@ -21,4 +21,16 @@ then I run this boot class ,window and button show,very exciting.
 --------------------------------------------------------------------------------
 20250224
 
+it's so warm,cat and rabbit in the sunshine.
+I write get table list ,get table columns ,get table foreign key test.
+maybe this application need service layer.
+so I design layer about database ,table ,column layer service.
+long time ago I learned some DDD book,this application I can use this method.
+I don't know which sqlite management software is popular.
+I search some software maintenance sqlite,a lot of them read sqlite database file.
+I am not agree with that idea.why can't we use sql?
+database file need .db,so when we connect file we need check it.
+when we are connecting database ,Do we need user name or password?
 
+--------------------------------------------------------------------------------
+20250225

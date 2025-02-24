@@ -1,4 +1,4 @@
-package com.vsked.sqlitemanager.bo;
+package com.vsked.sqlitemanager.domain;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

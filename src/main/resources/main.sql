@@ -42,7 +42,8 @@ CREATE TABLE "users" (
   "ID" integer,
   "userName" text,
   "age" INTEGER,
-  "password" TEXT
+  "password" TEXT,
+  PRIMARY KEY ("ID")
 );
 
 -- ----------------------------
