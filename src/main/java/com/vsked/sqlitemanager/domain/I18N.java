@@ -6,6 +6,9 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -123,5 +126,17 @@ public class I18N {
         Button button = new Button();
         button.textProperty().bind(createStringBinding(key, args));
         return button;
+    }
+
+    public static Menu menuForKey(final String key, final Object... args) {
+        Menu menu=new Menu();
+        menu.textProperty().bind(createStringBinding(key, args));
+        return menu;
+    }
+
+    public static MenuItem menuItemForKey(final String key, final Object... args) {
+        MenuItem menuItem=new MenuItem();
+        menuItem.textProperty().bind(createStringBinding(key, args));
+        return menuItem;
     }
 }

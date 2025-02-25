@@ -2,14 +2,17 @@ package com.vsked.sqlitemanager.ui;
 
 import com.vsked.sqlitemanager.domain.I18N;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,14 +37,39 @@ public class ApplicationMainUI extends Application {
 		// create content
 		BorderPane content = new BorderPane();
 
-		// at the top two buttons
-		HBox hbox = new HBox();
-		hbox.setPadding(new Insets(5, 5, 5, 5));
-		hbox.setSpacing(5);
+		MenuBar menuBar = new MenuBar();
 
-		Button btnEn = I18N.buttonForKey("button.english");
-		btnEn.setOnAction(new EventHandler<ActionEvent>() {
+		Menu fileMenu = I18N.menuForKey("menu.file");
+		Menu fileOpenMenu = I18N.menuForKey("menuItem.open");
+		Menu fileExitMenu = I18N.menuForKey("menuItem.exit");
 
+		fileOpenMenu.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				if(log.isTraceEnabled()) {
+					log.trace("You click the file open menu");
+				}
+
+			}
+		});
+
+		fileExitMenu.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				if(log.isTraceEnabled()) {
+					log.trace("You click the file exit menu");
+				}
+				Platform.exit();
+			}
+		});
+
+		Menu languageMenu = I18N.menuForKey("menu.language");
+		Menu englishMenu = I18N.menuForKey("menu.english");
+		Menu chineseMenu = I18N.menuForKey("menu.chinese");
+
+		englishMenu.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 				if(log.isTraceEnabled()) {
@@ -51,10 +79,7 @@ public class ApplicationMainUI extends Application {
 			}
 		});
 
-		hbox.getChildren().add(btnEn);
-
-		Button btnCn = I18N.buttonForKey("button.chinese");
-		btnCn.setOnAction(new EventHandler<ActionEvent>() {
+		chineseMenu.setOnAction(new EventHandler<ActionEvent>() {
 
 			@Override
 			public void handle(ActionEvent event) {
@@ -65,7 +90,20 @@ public class ApplicationMainUI extends Application {
 			}
 		});
 
-		hbox.getChildren().add(btnCn);
+		fileMenu.getItems().add(fileOpenMenu);
+		fileMenu.getItems().add(fileExitMenu);
+
+		languageMenu.getItems().add(englishMenu);
+		languageMenu.getItems().add(chineseMenu);
+
+		menuBar.getMenus().add(fileMenu);
+		menuBar.getMenus().add(languageMenu);
+
+
+		// at the top two buttons
+		HBox hbox = new HBox(menuBar);
+		hbox.setPadding(new Insets(5, 5, 5, 5));
+		hbox.setSpacing(5);
 
 		content.setTop(hbox);
 
@@ -74,6 +112,14 @@ public class ApplicationMainUI extends Application {
 
 		stage.titleProperty().bind(I18N.createStringBinding("window.title"));
 		stage.setScene(scene);
+
+		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			@Override
+			public void handle(WindowEvent event) {
+				Platform.exit();
+			}
+		});
+
 		stage.show();
 	}
 

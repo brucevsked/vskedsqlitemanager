@@ -27,10 +27,22 @@ maybe this application need service layer.
 so I design layer about database ,table ,column layer service.
 long time ago I learned some DDD book,this application I can use this method.
 I don't know which sqlite management software is popular.
-I search some software maintenance sqlite,a lot of them read sqlite database file.
+I search some software maintenance sqlite,
+a lot of them read sqlite database file.
 I am not agree with that idea.why can't we use sql?
 database file need .db,so when we connect file we need check it.
 when we are connecting database ,Do we need user name or password?
 
 --------------------------------------------------------------------------------
 20250225
+
+add menubar and switch language button to menu
+add file menu,In file menu you can open a database or exit application.
+but now open menu does not add action.
+I save 4 screen shoot you can see user interface effect.
+window snipping tool is good,sometime we use it create screen shoot.
+if you want make screen shoot first you can use print screen key ,
+press print screen key then use windows paint then resize you area,
+you can save this screen shoot image to a file.
+second you can use snipping when you open Snipping tool,
+you can press window+shift+s then choose area you want to save.
