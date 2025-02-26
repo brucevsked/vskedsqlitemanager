@@ -46,3 +46,20 @@ press print screen key then use windows paint then resize you area,
 you can save this screen shoot image to a file.
 second you can use snipping when you open Snipping tool,
 you can press window+shift+s then choose area you want to save.
+--------------------------------------------------------------------------------
+20250226
+
+when use java fx change table view value language
+we can use value properties bind
+add a toolbar can open file,exit,change chinese english language
+my english not very good,but every day I always learn it.
+If you want to learn english,you must only use english audio or video or txt
+Don't use your native language learn english.
+Believe me just use english to learn is good idea.
+My room is very cool today,but my heart is warm.
+I modify my resume and prepare find java development job.
+If you are at china shandong province jinan city,
+And you need a java developer you can tell me.
+I have been developer for 15 years.
+--------------------------------------------------------------------------------
+20250227

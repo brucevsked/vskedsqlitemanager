@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeItem;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -139,4 +140,12 @@ public class I18N {
         menuItem.textProperty().bind(createStringBinding(key, args));
         return menuItem;
     }
+
+    public static TreeItem<String> treeItemForKey(final String key, final Object... args) {
+        TreeItem<String> treeItem=new TreeItem<String>();
+        treeItem.valueProperty().bind(createStringBinding(key, args));
+        return treeItem;
+    }
+
+
 }
