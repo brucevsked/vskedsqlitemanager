@@ -63,3 +63,17 @@ And you need a java developer you can tell me.
 I have been developer for 15 years.
 --------------------------------------------------------------------------------
 20250227
+
+when you use button action event ,actually we can call same menu action
+so I remove old button event which has same menu item function
+Today when you open database file,you can show table list in database
+It's good start ,I create table,table column,table list and some other class
+I capture some new user interface image,now you can see the effect,
+how to show tables in database ,Language use english and chinese.
+Long time ago,I learned DDD it's called domain driver design.
+But I never use this design model to the actual project.
+And now I try use it in this project,maybe sometime I am wrong.
+but I am not afraid,just let's code work,implements function is first.
+then I can reconstruct code again,what do you think about.
+--------------------------------------------------------------------------------
+20250228

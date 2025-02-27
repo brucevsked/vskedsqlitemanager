@@ -1,7 +1,12 @@
 package com.vsked.sqlitemanager.ui;
 
 import com.vsked.sqlitemanager.domain.I18N;
+import com.vsked.sqlitemanager.domain.VConnection;
+import com.vsked.sqlitemanager.domain.VDatabaseFile;
+import com.vsked.sqlitemanager.domain.VTable;
+import com.vsked.sqlitemanager.domain.VTableList;
 import com.vsked.sqlitemanager.services.ApplicationService;
+import com.vsked.sqlitemanager.services.TableService;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -19,6 +24,8 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 import java.util.Locale;
 
 
@@ -49,16 +56,6 @@ public class ApplicationMainUI extends Application {
 		Menu fileOpenMenu = I18N.menuForKey("menuItem.open");
 		Menu fileExitMenu = I18N.menuForKey("menuItem.exit");
 
-		fileOpenMenu.setOnAction(new EventHandler<ActionEvent>() {
-
-			@Override
-			public void handle(ActionEvent event) {
-				if(log.isTraceEnabled()) {
-					log.trace("You click the file open menu from menu Item");
-				}
-				applicationService.openDataBaseFile(stage);
-			}
-		});
 
 		fileExitMenu.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -112,37 +109,12 @@ public class ApplicationMainUI extends Application {
 		Button chineseBt=I18N.buttonForKey("button.chinese");
 		Button exitBt=I18N.buttonForKey("button.exit");
 
-		englishBt.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				if(log.isTraceEnabled()) {
-					log.trace("You click the english button from tool bar");
-				}
-				switchLanguage(Locale.ENGLISH);
-			}
-		});
 
-		chineseBt.setOnAction(new EventHandler<ActionEvent>() {
+		englishBt.setOnAction(englishMenu.getOnAction());
 
-			@Override
-			public void handle(ActionEvent event) {
-				if(log.isTraceEnabled()) {
-					log.trace("You click the chinese button from tool bar");
-				}
-				switchLanguage(Locale.CHINESE);
-			}
-		});
+		chineseBt.setOnAction(chineseMenu.getOnAction());
 
-		exitBt.setOnAction(new EventHandler<ActionEvent>() {
-
-			@Override
-			public void handle(ActionEvent event) {
-				if(log.isTraceEnabled()) {
-					log.trace("You click the file exit button from tool bar");
-				}
-				applicationService.exit();
-			}
-		});
+		exitBt.setOnAction(fileExitMenu.getOnAction());
 
 		toolBar.getItems().add(openBt);
 		toolBar.getItems().add(queryBt);
@@ -155,8 +127,6 @@ public class ApplicationMainUI extends Application {
 		GridPane topGridPane=new GridPane();
 		topGridPane.add(menuBar,0,0);
 		topGridPane.add(toolBar,0,1);
-
-
 
 		content.setTop(topGridPane);
 
@@ -185,6 +155,28 @@ public class ApplicationMainUI extends Application {
 
 		leftGridPane.add(systemViewTree,0,0);
 		content.setLeft(leftGridPane);
+
+		fileOpenMenu.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				if(log.isTraceEnabled()) {
+					log.trace("You click the file open menu from menu Item");
+				}
+				VDatabaseFile databaseFile=applicationService.openDataBaseFile(stage);
+				VConnection connection=new VConnection(databaseFile);
+				TableService tableService=new TableService();
+				VTableList vTableList=tableService.getTables(connection);
+				List<VTable> tableList=vTableList.getTables();
+				for(VTable table:tableList){
+					TreeItem<String> tablesItemNode=new TreeItem<>(table.getTableName().getTableName());
+					tablesItem.getChildren().add(tablesItemNode);
+				}
+
+			}
+		});
+
+		openBt.setOnAction(fileOpenMenu.getOnAction());
 
 
 		Scene scene = new Scene(content, 500, 500);

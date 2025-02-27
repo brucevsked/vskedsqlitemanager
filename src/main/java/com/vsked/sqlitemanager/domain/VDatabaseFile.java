@@ -11,4 +11,8 @@ public class VDatabaseFile {
         }
         this.databaseFile = databaseFile;
     }
+
+    public File getDatabaseFile() {
+        return databaseFile;
+    }
 }
