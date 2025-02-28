@@ -4,17 +4,26 @@ import com.vsked.sqlitemanager.domain.I18N;
 import com.vsked.sqlitemanager.domain.VConnection;
 import com.vsked.sqlitemanager.domain.VDatabaseFile;
 import com.vsked.sqlitemanager.domain.VTable;
+import com.vsked.sqlitemanager.domain.VTableColumn;
 import com.vsked.sqlitemanager.domain.VTableList;
+import com.vsked.sqlitemanager.domain.VTableName;
 import com.vsked.sqlitemanager.services.ApplicationService;
+import com.vsked.sqlitemanager.services.DatabaseService;
 import com.vsked.sqlitemanager.services.TableService;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -33,8 +42,17 @@ public class ApplicationMainUI extends Application {
 
 	private static final Logger log = LoggerFactory.getLogger(ApplicationMainUI.class);
 
-	ApplicationService applicationService=new ApplicationService();
-	
+	private ApplicationService applicationService=new ApplicationService();
+	private DatabaseService databaseService;
+
+	public DatabaseService getDatabaseService() {
+		return databaseService;
+	}
+
+	public void setDatabaseService(DatabaseService databaseService) {
+		this.databaseService = databaseService;
+	}
+
 	public static void main(String[] args) {
 		if(log.isTraceEnabled()) {
 			log.trace("welcome to vsked SQLite manager");
@@ -42,6 +60,7 @@ public class ApplicationMainUI extends Application {
 		launch(args);
 		
 	}
+
 
 	@Override
 	public void start(Stage stage) throws Exception {
@@ -148,6 +167,38 @@ public class ApplicationMainUI extends Application {
 		rootItem.getChildren().add(queriesItem);
 		rootItem.getChildren().add(backupItem);
 
+
+		GridPane centerGridPane=new GridPane();
+		content.setCenter(centerGridPane);
+
+
+
+		systemViewTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem>() {
+			@Override
+			public void changed(ObservableValue<? extends TreeItem> paramObservableValue, TreeItem paramT1, TreeItem selectedItem) {
+
+				System.out.println(selectedItem); // The newly selected TreeItem.
+				if(selectedItem.getParent().getValue().equals(tablesItem.getValue())){
+					TabPane tabPane=new TabPane();
+					tabPane.setMinWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
+					Tab tab=new Tab(selectedItem.getValue().toString());
+					TableView<VTableColumn> tableView=new TableView<VTableColumn>();
+
+					TableService tableService=new TableService(getDatabaseService().getvConnection());
+					List<VTableColumn> tableColumns=tableService.getColumns(new VTableName(selectedItem.getValue().toString()));
+                    for(VTableColumn tableColumn:tableColumns){
+						tableView.getColumns().add(new TableColumn<>(tableColumn.getName()));
+					}
+
+					tab.setContent(tableView);
+					tab.setClosable(true);
+					tabPane.getTabs().add(tab);
+					centerGridPane.add(tabPane,0,0);
+				}
+
+			}
+		});
+
 		systemViewTree.setRoot(rootItem);
 
 		systemViewTree.setShowRoot(false);
@@ -164,14 +215,19 @@ public class ApplicationMainUI extends Application {
 					log.trace("You click the file open menu from menu Item");
 				}
 				VDatabaseFile databaseFile=applicationService.openDataBaseFile(stage);
-				VConnection connection=new VConnection(databaseFile);
-				TableService tableService=new TableService();
-				VTableList vTableList=tableService.getTables(connection);
+
+				setDatabaseService(new DatabaseService(databaseFile));
+				VConnection connection=getDatabaseService().getvConnection();
+
+				TableService tableService=new TableService(connection);
+				VTableList vTableList=tableService.getTables();
 				List<VTable> tableList=vTableList.getTables();
 				for(VTable table:tableList){
 					TreeItem<String> tablesItemNode=new TreeItem<>(table.getTableName().getTableName());
 					tablesItem.getChildren().add(tablesItemNode);
 				}
+
+				tablesItem.setExpanded(true);
 
 			}
 		});
@@ -179,7 +235,7 @@ public class ApplicationMainUI extends Application {
 		openBt.setOnAction(fileOpenMenu.getOnAction());
 
 
-		Scene scene = new Scene(content, 500, 500);
+		Scene scene = new Scene(content, 1000, 500);
 
 		stage.titleProperty().bind(I18N.createStringBinding("window.title"));
 		stage.setScene(scene);
@@ -190,8 +246,6 @@ public class ApplicationMainUI extends Application {
 				Platform.exit();
 			}
 		});
-
-
 
 		stage.show();
 	}

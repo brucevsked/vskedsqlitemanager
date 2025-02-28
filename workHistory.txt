@@ -77,3 +77,14 @@ but I am not afraid,just let's code work,implements function is first.
 then I can reconstruct code again,what do you think about.
 --------------------------------------------------------------------------------
 20250228
+
+when you click table you can see the table columns  in right tab content.
+but it's has little bug.when you click another table name,
+the tab still at tabPanel.
+I like write java code very much.but now I only at home .
+I need job in china shandong province jinan city,if you need java developer,
+you can tell me ,I learn english every day,I write java code every day.
+Maybe someday I can find a job.I send more than 100 times resume to company.
+but only 3 out pack company tell me one or two sentence.
+everything will be all right.I believe I can find job in jinan.
+
