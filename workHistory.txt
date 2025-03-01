@@ -88,3 +88,24 @@ Maybe someday I can find a job.I send more than 100 times resume to company.
 but only 3 out pack company tell me one or two sentence.
 everything will be all right.I believe I can find job in jinan.
 
+--------------------------------------------------------------------------------
+20250301
+
+view data model is not database model and database model is not business model
+sometime we search data from database pack to database model,
+but this model often not use all columns.
+In our business flow,we need transform database model to business model,
+this business model maybe more column than database model,
+sometimes business model maybe less column than database model,
+In business model sometime we calculate some properties use other properties,
+like age properties ,we can use birthday calculate result.
+a lot of project only use database model,but it's dangerous.
+some projects use database model and business model,
+some project mixed business model and view model or
+mixed database model,business model,view model.
+every one has their choose.
+why click table table column not change in tableview?
+I need find this bug and repair it.
+
+--------------------------------------------------------------------------------
+20250302

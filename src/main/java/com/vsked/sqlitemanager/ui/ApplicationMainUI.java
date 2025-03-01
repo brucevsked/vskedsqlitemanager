@@ -5,6 +5,7 @@ import com.vsked.sqlitemanager.domain.VConnection;
 import com.vsked.sqlitemanager.domain.VDatabaseFile;
 import com.vsked.sqlitemanager.domain.VTable;
 import com.vsked.sqlitemanager.domain.VTableColumn;
+import com.vsked.sqlitemanager.viewmodel.TableColumn;
 import com.vsked.sqlitemanager.domain.VTableList;
 import com.vsked.sqlitemanager.domain.VTableName;
 import com.vsked.sqlitemanager.services.ApplicationService;
@@ -15,6 +16,7 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -22,7 +24,6 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
@@ -170,30 +171,39 @@ public class ApplicationMainUI extends Application {
 
 		GridPane centerGridPane=new GridPane();
 		content.setCenter(centerGridPane);
-
-
+		TabPane tabPane=new TabPane();
+		centerGridPane.add(tabPane,0,0);
 
 		systemViewTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem>() {
 			@Override
 			public void changed(ObservableValue<? extends TreeItem> paramObservableValue, TreeItem paramT1, TreeItem selectedItem) {
 
-				System.out.println(selectedItem); // The newly selected TreeItem.
+				if(log.isDebugEnabled()){
+					System.out.println(selectedItem);
+					log.debug(selectedItem+"");
+				}
+				//TODO will click same table only add one tab
+
 				if(selectedItem.getParent().getValue().equals(tablesItem.getValue())){
-					TabPane tabPane=new TabPane();
+
 					tabPane.setMinWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
 					Tab tab=new Tab(selectedItem.getValue().toString());
-					TableView<VTableColumn> tableView=new TableView<VTableColumn>();
+					TableView<TableColumn> tableView=new TableView<TableColumn>();
 
 					TableService tableService=new TableService(getDatabaseService().getvConnection());
 					List<VTableColumn> tableColumns=tableService.getColumns(new VTableName(selectedItem.getValue().toString()));
-                    for(VTableColumn tableColumn:tableColumns){
-						tableView.getColumns().add(new TableColumn<>(tableColumn.getName()));
+					List<TableColumn> tableViewColumns=tableService.getTableViewColumns(tableColumns);
+                    for(TableColumn tableColumn:tableViewColumns){
+						tableView.getColumns().add(new javafx.scene.control.TableColumn<>(tableColumn.getName()));
 					}
 
 					tab.setContent(tableView);
 					tab.setClosable(true);
+
 					tabPane.getTabs().add(tab);
-					centerGridPane.add(tabPane,0,0);
+
+					tabPane.getSelectionModel().select(tab);
+
 				}
 
 			}

@@ -1,43 +1,44 @@
 package com.vsked.sqlitemanager.domain;
 
 public class VTableColumn {
-    private int cid;
-    private String name;
-    private String dataType;
-    private boolean isNotNull;
-    private String dflt_value;
-    private int pk;
 
-    public VTableColumn(int cid, String name, String dataType, boolean isNotNull, String dflt_value, int pk) {
-        this.cid = cid;
+    private VTableColumnId id;
+    private VTableColumnName name;
+    private VTableTableColumnDataType dataType;
+    private VTableColumnNotNull notNull;
+    private VTableDfltValue dfltValue;
+    private VTableColumnPk pk;
+
+    public VTableColumn(VTableColumnId id, VTableColumnName name, VTableTableColumnDataType dataType, VTableColumnNotNull notNull, VTableDfltValue dfltValue, VTableColumnPk pk) {
+        this.id = id;
         this.name = name;
         this.dataType = dataType;
-        this.isNotNull = isNotNull;
-        this.dflt_value = dflt_value;
+        this.notNull = notNull;
+        this.dfltValue = dfltValue;
         this.pk = pk;
     }
 
-    public int getCid() {
-        return cid;
+    public VTableColumnId getId() {
+        return id;
     }
 
-    public String getName() {
+    public VTableColumnName getName() {
         return name;
     }
 
-    public String getDataType() {
+    public VTableTableColumnDataType getDataType() {
         return dataType;
     }
 
-    public boolean isNotNull() {
-        return isNotNull;
+    public VTableColumnNotNull getNotNull() {
+        return notNull;
     }
 
-    public String getDflt_value() {
-        return dflt_value;
+    public VTableDfltValue getDfltValue() {
+        return dfltValue;
     }
 
-    public int getPk() {
+    public VTableColumnPk getPk() {
         return pk;
     }
 }
