@@ -109,3 +109,9 @@ I need find this bug and repair it.
 
 --------------------------------------------------------------------------------
 20250302
+
+sunday write little code and have little happy
+last version application when you click table name will add a tab to tab panel.
+when you click a lot of times table name,
+it will add a lot of same table tab in tab panel.
+today I fixed it

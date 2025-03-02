@@ -18,6 +18,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
@@ -182,27 +183,52 @@ public class ApplicationMainUI extends Application {
 					System.out.println(selectedItem);
 					log.debug(selectedItem+"");
 				}
-				//TODO will click same table only add one tab
 
-				if(selectedItem.getParent().getValue().equals(tablesItem.getValue())){
+				List<Tab> oldTabList=tabPane.getTabs();
+				boolean isExistTab=false;
 
-					tabPane.setMinWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
-					Tab tab=new Tab(selectedItem.getValue().toString());
-					TableView<TableColumn> tableView=new TableView<TableColumn>();
-
-					TableService tableService=new TableService(getDatabaseService().getvConnection());
-					List<VTableColumn> tableColumns=tableService.getColumns(new VTableName(selectedItem.getValue().toString()));
-					List<TableColumn> tableViewColumns=tableService.getTableViewColumns(tableColumns);
-                    for(TableColumn tableColumn:tableViewColumns){
-						tableView.getColumns().add(new javafx.scene.control.TableColumn<>(tableColumn.getName()));
+				for(Tab tab:oldTabList){
+                    if(log.isDebugEnabled()){
+						log.debug(tab.getId()+"|"+selectedItem.getValue());
 					}
 
-					tab.setContent(tableView);
-					tab.setClosable(true);
+					if(tab.getId().equals(selectedItem.getValue())){
+						isExistTab=true;
+						tabPane.getSelectionModel().select(tab);
+						break;
+					}
+				}
+                //when you click table sub node
+				if(selectedItem.getParent().getValue().equals(tablesItem.getValue())){
+					//when not exist table tab
+					if(isExistTab==false){
+						tabPane.setMinWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
+						Tab tab=new Tab(selectedItem.getValue().toString());
+						TableView<TableColumn> tableView=new TableView<TableColumn>();
 
-					tabPane.getTabs().add(tab);
+						TableService tableService=new TableService(getDatabaseService().getvConnection());
+						List<VTableColumn> tableColumns=tableService.getColumns(new VTableName(selectedItem.getValue().toString()));
+						List<TableColumn> tableViewColumns=tableService.getTableViewColumns(tableColumns);
+						for(TableColumn tableColumn:tableViewColumns){
+							tableView.getColumns().add(new javafx.scene.control.TableColumn<>(tableColumn.getName()));
+						}
 
-					tabPane.getSelectionModel().select(tab);
+						tab.setContent(tableView);
+						tab.setClosable(true);
+						tab.setId(selectedItem.getValue()+"");
+						tab.setOnSelectionChanged(new EventHandler<Event>() {
+							@Override
+							public void handle(Event event) {
+								//TODO when click tab change tree view select item
+							}
+						});
+
+						//TODO when click tab change tree item selected
+
+						tabPane.getTabs().add(tab);
+
+						tabPane.getSelectionModel().select(tab);
+					}
 
 				}
 
