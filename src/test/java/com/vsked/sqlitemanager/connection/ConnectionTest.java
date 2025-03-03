@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 
 public class ConnectionTest {
@@ -66,6 +67,35 @@ public class ConnectionTest {
                 int age=rs.getInt("age");
                 String password=rs.getString("password");
                 log.info(id+"|"+userName+"|"+age+"|"+password);
+            }
+            rs.close();
+            st.close();
+            conn.close();
+        } catch (Exception e) {
+            log.error("connection test error",e);
+        }
+    }
+
+    @Test
+    public void searchDataAnyTable(){
+        try {
+            Class.forName(jdbcDriver);
+            Connection conn= DriverManager.getConnection("jdbc:sqlite:myTestSqlite01.db");
+            log.info("connection sqlite database success!");
+            Statement st=conn.createStatement();
+
+
+            String sql="select ID,userName,age,password from users";
+            ResultSet rs=st.executeQuery(sql);
+
+            int maxFiledSize = rs.getMetaData().getColumnCount();
+
+            while (rs.next()){
+                Object s1="";
+                for(int i=1;i<=maxFiledSize;i++){
+                    s1=s1+"|"+rs.getObject(i);
+                }
+                log.info(s1+"");
             }
             rs.close();
             st.close();

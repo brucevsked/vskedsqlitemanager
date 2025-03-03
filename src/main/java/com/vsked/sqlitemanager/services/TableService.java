@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.LinkedList;
@@ -104,5 +105,29 @@ public class TableService {
             tableColumns.add(new TableColumn(tableColumn.getId().getCid(),tableColumn.getName().getName()));
         }
         return tableColumns;
+    }
+
+    public void getData(VTableName tableName){
+        try {
+            Connection conn= getvConnection().getConnection();
+            Statement st=conn.createStatement();
+            String sql="select * from "+tableName.getTableName();
+            ResultSet rs=st.executeQuery(sql);
+
+            int maxFiledSize = rs.getMetaData().getColumnCount();
+
+            while (rs.next()){
+                Object s1="";
+                for(int i=1;i<=maxFiledSize;i++){
+                    s1=s1+"|"+rs.getObject(i);
+                }
+                log.info(s1+"");
+            }
+            rs.close();
+            st.close();
+            conn.close();
+        } catch (Exception e) {
+            log.error("connection test error",e);
+        }
     }
 }

@@ -173,6 +173,18 @@ public class ApplicationMainUI extends Application {
 		GridPane centerGridPane=new GridPane();
 		content.setCenter(centerGridPane);
 		TabPane tabPane=new TabPane();
+
+		tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
+					if (newTab != null) {
+						List<TreeItem<String>> tableItems=tablesItem.getChildren();
+						for(TreeItem<String> item:tableItems){
+							if(item.getValue().equals(newTab.getText())){
+								systemViewTree.getSelectionModel().select(item);
+							}
+						}
+					}
+		});
+
 		centerGridPane.add(tabPane,0,0);
 
 		systemViewTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem>() {
@@ -216,14 +228,6 @@ public class ApplicationMainUI extends Application {
 						tab.setContent(tableView);
 						tab.setClosable(true);
 						tab.setId(selectedItem.getValue()+"");
-						tab.setOnSelectionChanged(new EventHandler<Event>() {
-							@Override
-							public void handle(Event event) {
-								//TODO when click tab change tree view select item
-							}
-						});
-
-						//TODO when click tab change tree item selected
 
 						tabPane.getTabs().add(tab);
 

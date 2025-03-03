@@ -115,3 +115,17 @@ last version application when you click table name will add a tab to tab panel.
 when you click a lot of times table name,
 it will add a lot of same table tab in tab panel.
 today I fixed it
+
+--------------------------------------------------------------------------------
+20250303
+
+Yesterday There was a big snow,So today it's so cold
+remember when change tab we need change tree item question.
+I repaired it now ,use selected item listener solve.
+when we live always have a lot of difficult question.
+use you head we will find the way.
+you can find it in internet.
+you can ask your friends.
+you can think it yourself.
+Just believe everything will be all right.
+
