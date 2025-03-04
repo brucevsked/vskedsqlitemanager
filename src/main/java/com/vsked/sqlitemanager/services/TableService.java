@@ -7,7 +7,7 @@ import com.vsked.sqlitemanager.domain.VTableColumnNotNull;
 import com.vsked.sqlitemanager.domain.VTableColumnPk;
 import com.vsked.sqlitemanager.domain.VTableDfltValue;
 import com.vsked.sqlitemanager.domain.VTableTableColumnDataType;
-import com.vsked.sqlitemanager.viewmodel.TableColumn;
+import com.vsked.sqlitemanager.viewmodel.TableColumnView;
 import com.vsked.sqlitemanager.domain.VTableName;
 import com.vsked.sqlitemanager.domain.VConnection;
 import com.vsked.sqlitemanager.domain.VTable;
@@ -16,11 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class TableService {
 
@@ -57,7 +60,6 @@ public class TableService {
 
             rs.close();
             st.close();
-            conn.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -90,7 +92,6 @@ public class TableService {
 
             rs.close();
             st.close();
-            conn.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -99,35 +100,37 @@ public class TableService {
 
     }
 
-    public List<TableColumn> getTableViewColumns(List<VTableColumn> tableColumnList){
-        List<TableColumn> tableColumns=new LinkedList<>();
+    public List<TableColumnView> getTableViewColumns(List<VTableColumn> tableColumnList){
+        List<TableColumnView> tableColumnViews =new LinkedList<>();
         for(VTableColumn tableColumn:tableColumnList){
-            tableColumns.add(new TableColumn(tableColumn.getId().getCid(),tableColumn.getName().getName()));
+            tableColumnViews.add(new TableColumnView(tableColumn.getId().getCid(),tableColumn.getName().getName()));
         }
-        return tableColumns;
+        return tableColumnViews;
     }
 
-    public void getData(VTableName tableName){
+    public List<Map> getData(VTableName tableName){
+        List<Map> tableDataList=new ArrayList<>();
         try {
             Connection conn= getvConnection().getConnection();
             Statement st=conn.createStatement();
             String sql="select * from "+tableName.getTableName();
             ResultSet rs=st.executeQuery(sql);
 
-            int maxFiledSize = rs.getMetaData().getColumnCount();
+            ResultSetMetaData metaData=rs.getMetaData();
+            int maxFiledSize = metaData.getColumnCount();
 
             while (rs.next()){
-                Object s1="";
+                Map data=new HashMap<>();
                 for(int i=1;i<=maxFiledSize;i++){
-                    s1=s1+"|"+rs.getObject(i);
+                    data.put(metaData.getColumnName(i),rs.getString(i));
                 }
-                log.info(s1+"");
+                tableDataList.add(data);
             }
             rs.close();
             st.close();
-            conn.close();
         } catch (Exception e) {
-            log.error("connection test error",e);
+            log.error("get table data error",e);
         }
+        return tableDataList;
     }
 }

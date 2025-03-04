@@ -5,7 +5,7 @@ import com.vsked.sqlitemanager.domain.VConnection;
 import com.vsked.sqlitemanager.domain.VDatabaseFile;
 import com.vsked.sqlitemanager.domain.VTable;
 import com.vsked.sqlitemanager.domain.VTableColumn;
-import com.vsked.sqlitemanager.viewmodel.TableColumn;
+import com.vsked.sqlitemanager.viewmodel.TableColumnView;
 import com.vsked.sqlitemanager.domain.VTableList;
 import com.vsked.sqlitemanager.domain.VTableName;
 import com.vsked.sqlitemanager.services.ApplicationService;
@@ -15,20 +15,22 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
@@ -36,8 +38,10 @@ import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 
 public class ApplicationMainUI extends Application {
@@ -216,14 +220,24 @@ public class ApplicationMainUI extends Application {
 					if(isExistTab==false){
 						tabPane.setMinWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
 						Tab tab=new Tab(selectedItem.getValue().toString());
-						TableView<TableColumn> tableView=new TableView<TableColumn>();
+						TableView<Map> tableView=new TableView<>();
+
 
 						TableService tableService=new TableService(getDatabaseService().getvConnection());
-						List<VTableColumn> tableColumns=tableService.getColumns(new VTableName(selectedItem.getValue().toString()));
-						List<TableColumn> tableViewColumns=tableService.getTableViewColumns(tableColumns);
-						for(TableColumn tableColumn:tableViewColumns){
-							tableView.getColumns().add(new javafx.scene.control.TableColumn<>(tableColumn.getName()));
+						VTableName currentTableName=new VTableName(selectedItem.getValue().toString());
+						List<VTableColumn> tableColumns=tableService.getColumns(currentTableName);
+						List<TableColumnView> tableViewColumns=tableService.getTableViewColumns(tableColumns);
+						for(TableColumnView tableColumnView :tableViewColumns){
+							TableColumn<Map, String> keyColumn = new TableColumn<>(tableColumnView.getName());
+							keyColumn.setCellValueFactory(new MapValueFactory<>(tableColumnView.getName()));
+							tableView.getColumns().add(keyColumn);
 						}
+
+
+						List<Map> tableDatas=tableService.getData(currentTableName);
+						ObservableList<Map> dataList=FXCollections.observableArrayList(tableDatas);
+                        log.debug(dataList+"");
+						tableView.setItems(dataList);
 
 						tab.setContent(tableView);
 						tab.setClosable(true);

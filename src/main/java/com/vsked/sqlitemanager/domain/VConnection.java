@@ -2,10 +2,13 @@ package com.vsked.sqlitemanager.domain;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class VConnection {
 
     private final Connection connection;
+    private VDatabaseFile currentDatabaseFile;
+
 
     public VConnection(VDatabaseFile databaseFile) {
         if(databaseFile==null){
@@ -34,9 +37,17 @@ public class VConnection {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        this.currentDatabaseFile=databaseFile;
     }
 
-    public Connection getConnection() {
+    public VDatabaseFile getCurrentDatabaseFile() {
+        return currentDatabaseFile;
+    }
+
+    public Connection getConnection() throws SQLException {
+        if(connection==null || connection.isClosed()==true){
+            return new VConnection(this.getCurrentDatabaseFile()).getConnection();
+        }
         return connection;
     }
 }

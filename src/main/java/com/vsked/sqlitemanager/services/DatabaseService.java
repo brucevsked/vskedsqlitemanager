@@ -6,7 +6,6 @@ import com.vsked.sqlitemanager.domain.VDatabaseFile;
 public class DatabaseService {
 
     private VDatabaseFile vDatabaseFile;
-    private VConnection vConnection;
 
     public DatabaseService(VDatabaseFile vDatabaseFile) {
         this.vDatabaseFile = vDatabaseFile;

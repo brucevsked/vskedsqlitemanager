@@ -129,3 +129,24 @@ you can ask your friends.
 you can think it yourself.
 Just believe everything will be all right.
 
+--------------------------------------------------------------------------------
+20250304
+
+Now you can show your table data from database,
+just open you database and select a table,
+then you can see a new table,
+although it's only show table data no pagination,
+I capture new picture and save to screen shoot folder.
+You can see the application effect now.
+
+
+
+
+
+
+
+
+I will install a virtual machine.
+because there was a lot of virus in internet
+I can try virtualbox or vmware or other sandbox in windows11
+
