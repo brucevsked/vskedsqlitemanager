@@ -1,5 +1,6 @@
 package com.vsked.sqlitemanager.services;
 
+import com.vsked.sqlitemanager.domain.VPage;
 import com.vsked.sqlitemanager.domain.VTableColumn;
 import com.vsked.sqlitemanager.domain.VTableColumnId;
 import com.vsked.sqlitemanager.domain.VTableColumnName;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
@@ -29,21 +31,21 @@ public class TableService {
 
     private static final Logger log = LoggerFactory.getLogger(TableService.class);
 
-    private VConnection vConnection;
+    private DatabaseService databaseService;
 
-    public TableService(VConnection vConnection) {
-        this.vConnection = vConnection;
+    public TableService(DatabaseService databaseService) {
+        this.databaseService = databaseService;
     }
 
-    public VConnection getvConnection() {
-        return vConnection;
+    public DatabaseService getDatabaseService() {
+        return databaseService;
     }
 
     public VTableList getTables(){
         List<VTable> tableList=new LinkedList<>();
 
         try {
-            Connection conn= getvConnection().getConnection();
+            Connection conn= getDatabaseService().getvConnection().getConnection();
             Statement st=conn.createStatement();
             String sql="SELECT name FROM sqlite_master WHERE type='table'";
             ResultSet rs=st.executeQuery(sql);
@@ -71,7 +73,7 @@ public class TableService {
         List<VTableColumn> tableColumns=new LinkedList<>();
         try {
 
-            Connection conn= getvConnection().getConnection();
+            Connection conn= getDatabaseService().getvConnection().getConnection();
             Statement st=conn.createStatement();
             String sql="select * from pragma_table_info('"+tableName.getTableName()+"')";
             ResultSet rs=st.executeQuery(sql);
@@ -100,6 +102,30 @@ public class TableService {
 
     }
 
+    public int getTableRecordCount(VTableName tableName){
+        int recordCount=0;
+        try {
+
+            Connection conn= getDatabaseService().getvConnection().getConnection();
+            log.info("connection sqlite database success!");
+            Statement st=conn.createStatement();
+            String sql="select count(1) ct from "+tableName.getTableName();
+            ResultSet rs=st.executeQuery(sql);
+            if (rs.next()){
+                recordCount=rs.getInt(1);
+                if(log.isDebugEnabled()){
+                    log.info(recordCount+"|");
+                }
+            }
+            rs.close();
+            st.close();
+            conn.close();
+        } catch (Exception e) {
+            log.error("connection test error",e);
+        }
+        return recordCount;
+    }
+
     public List<TableColumnView> getTableViewColumns(List<VTableColumn> tableColumnList){
         List<TableColumnView> tableColumnViews =new LinkedList<>();
         for(VTableColumn tableColumn:tableColumnList){
@@ -108,10 +134,10 @@ public class TableService {
         return tableColumnViews;
     }
 
-    public List<Map> getData(VTableName tableName){
+    public List<Map> getData(VTableName tableName, VPage VPage){
         List<Map> tableDataList=new ArrayList<>();
         try {
-            Connection conn= getvConnection().getConnection();
+            Connection conn= getDatabaseService().getvConnection().getConnection();
             Statement st=conn.createStatement();
             String sql="select * from "+tableName.getTableName();
             ResultSet rs=st.executeQuery(sql);

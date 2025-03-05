@@ -1,13 +1,13 @@
 package com.vsked.sqlitemanager.domain;
 
-public class QueryConditionValue {
+public class VQueryConditionValue {
 	
 	/**
 	 * query condition value
 	 */
     private String value;
 
-	public QueryConditionValue(String value) {
+	public VQueryConditionValue(String value) {
 		this.value = value;
 	}
 

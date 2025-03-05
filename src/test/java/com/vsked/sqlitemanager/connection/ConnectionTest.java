@@ -77,6 +77,27 @@ public class ConnectionTest {
     }
 
     @Test
+    public void searchDataCount(){
+        try {
+            Class.forName(jdbcDriver);
+            Connection conn= DriverManager.getConnection("jdbc:sqlite:myTestSqlite01.db");
+            log.info("connection sqlite database success!");
+            Statement st=conn.createStatement();
+            String sql="select count(1) ct from users";
+            ResultSet rs=st.executeQuery(sql);
+            if (rs.next()){
+               int ct=rs.getInt(1);
+                log.info(ct+"|");
+            }
+            rs.close();
+            st.close();
+            conn.close();
+        } catch (Exception e) {
+            log.error("connection test error",e);
+        }
+    }
+
+    @Test
     public void searchDataAnyTable(){
         try {
             Class.forName(jdbcDriver);

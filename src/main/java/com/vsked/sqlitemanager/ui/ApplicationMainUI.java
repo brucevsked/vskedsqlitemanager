@@ -1,8 +1,11 @@
 package com.vsked.sqlitemanager.ui;
 
 import com.vsked.sqlitemanager.domain.I18N;
+import com.vsked.sqlitemanager.domain.VPage;
 import com.vsked.sqlitemanager.domain.VConnection;
 import com.vsked.sqlitemanager.domain.VDatabaseFile;
+import com.vsked.sqlitemanager.domain.VPageIndex;
+import com.vsked.sqlitemanager.domain.VPageSize;
 import com.vsked.sqlitemanager.domain.VTable;
 import com.vsked.sqlitemanager.domain.VTableColumn;
 import com.vsked.sqlitemanager.viewmodel.TableColumnView;
@@ -23,6 +26,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.Pagination;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
@@ -38,7 +42,6 @@ import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -191,6 +194,8 @@ public class ApplicationMainUI extends Application {
 
 		centerGridPane.add(tabPane,0,0);
 
+		VPage vTablePage =new VPage(new VPageIndex(0),new VPageSize(10));
+
 		systemViewTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem>() {
 			@Override
 			public void changed(ObservableValue<? extends TreeItem> paramObservableValue, TreeItem paramT1, TreeItem selectedItem) {
@@ -220,10 +225,12 @@ public class ApplicationMainUI extends Application {
 					if(isExistTab==false){
 						tabPane.setMinWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
 						Tab tab=new Tab(selectedItem.getValue().toString());
+						GridPane tableGridPane=new GridPane();
+
 						TableView<Map> tableView=new TableView<>();
 
 
-						TableService tableService=new TableService(getDatabaseService().getvConnection());
+						TableService tableService=new TableService(getDatabaseService());
 						VTableName currentTableName=new VTableName(selectedItem.getValue().toString());
 						List<VTableColumn> tableColumns=tableService.getColumns(currentTableName);
 						List<TableColumnView> tableViewColumns=tableService.getTableViewColumns(tableColumns);
@@ -234,12 +241,18 @@ public class ApplicationMainUI extends Application {
 						}
 
 
-						List<Map> tableDatas=tableService.getData(currentTableName);
+						List<Map> tableDatas=tableService.getData(currentTableName,vTablePage);
 						ObservableList<Map> dataList=FXCollections.observableArrayList(tableDatas);
                         log.debug(dataList+"");
 						tableView.setItems(dataList);
 
-						tab.setContent(tableView);
+						tableGridPane.add(tableView,0,0);
+
+						Pagination pagination=new Pagination();
+						tableGridPane.add(pagination,0,1);//column,row
+
+
+						tab.setContent(tableGridPane);
 						tab.setClosable(true);
 						tab.setId(selectedItem.getValue()+"");
 
@@ -271,9 +284,8 @@ public class ApplicationMainUI extends Application {
 				VDatabaseFile databaseFile=applicationService.openDataBaseFile(stage);
 
 				setDatabaseService(new DatabaseService(databaseFile));
-				VConnection connection=getDatabaseService().getvConnection();
 
-				TableService tableService=new TableService(connection);
+				TableService tableService=new TableService(getDatabaseService());
 				VTableList vTableList=tableService.getTables();
 				List<VTable> tableList=vTableList.getTables();
 				for(VTable table:tableList){

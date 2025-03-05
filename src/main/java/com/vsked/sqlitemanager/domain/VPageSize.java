@@ -3,11 +3,11 @@ package com.vsked.sqlitemanager.domain;
 /**
  * records in per page
  */
-public class PageSize {
+public class VPageSize {
 
     private Integer size;
 
-    public PageSize(Integer size) {
+    public VPageSize(Integer size) {
         if(size==null){
             size= 10;
         }

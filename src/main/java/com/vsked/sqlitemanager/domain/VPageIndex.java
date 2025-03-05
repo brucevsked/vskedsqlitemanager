@@ -3,13 +3,13 @@ package com.vsked.sqlitemanager.domain;
 /**
  * pageIndex,also current page number
  */
-public class PageIndex {
+public class VPageIndex {
     /**
      * start index at current page
      */
     private Integer index;
 
-    public PageIndex(Integer index) {
+    public VPageIndex(Integer index) {
         if(index==null){
             index= 0;
         }

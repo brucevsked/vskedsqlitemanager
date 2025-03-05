@@ -3,11 +3,11 @@ package com.vsked.sqlitemanager.domain;
 /**
  * total records number,also all records number
  */
-public class PageTotalElementsNumber {
+public class VPageTotalElementsNumber {
 
     private Long total;
 
-    public PageTotalElementsNumber(Long total) {
+    public VPageTotalElementsNumber(Long total) {
         if(total==null){
             total= 0L;
         }

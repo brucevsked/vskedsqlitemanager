@@ -14,7 +14,7 @@ use github desktop version commit my project to github
 20250223
 
 today I download javafx sdk from website:https://jdk.java.net/javafx23/
-I search a lot of web page from google find solved method
+I search a lot of web VPage from google find solved method
 Write a new StartUI class then use this new class start ApplicationMainUI  
 then I run this boot class ,window and button show,very exciting.
 
@@ -138,6 +138,13 @@ then you can see a new table,
 although it's only show table data no pagination,
 I capture new picture and save to screen shoot folder.
 You can see the application effect now.
+
+--------------------------------------------------------------------------------
+20250305
+
+add pagination control component to table
+add grid panel to tab,because old table in tab is so ugly.
+today I am very busy ,just write a little code.
 
 
 
