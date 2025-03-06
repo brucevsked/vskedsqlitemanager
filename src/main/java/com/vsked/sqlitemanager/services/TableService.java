@@ -1,23 +1,25 @@
 package com.vsked.sqlitemanager.services;
 
 import com.vsked.sqlitemanager.domain.VPage;
+import com.vsked.sqlitemanager.domain.VPageTotalElementsNumber;
 import com.vsked.sqlitemanager.domain.VTableColumn;
 import com.vsked.sqlitemanager.domain.VTableColumnId;
 import com.vsked.sqlitemanager.domain.VTableColumnName;
 import com.vsked.sqlitemanager.domain.VTableColumnNotNull;
 import com.vsked.sqlitemanager.domain.VTableColumnPk;
 import com.vsked.sqlitemanager.domain.VTableDfltValue;
+import com.vsked.sqlitemanager.domain.VTableRecordCount;
 import com.vsked.sqlitemanager.domain.VTableTableColumnDataType;
 import com.vsked.sqlitemanager.viewmodel.TableColumnView;
 import com.vsked.sqlitemanager.domain.VTableName;
-import com.vsked.sqlitemanager.domain.VConnection;
 import com.vsked.sqlitemanager.domain.VTable;
 import com.vsked.sqlitemanager.domain.VTableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
@@ -102,7 +104,7 @@ public class TableService {
 
     }
 
-    public int getTableRecordCount(VTableName tableName){
+    public VTableRecordCount getTableRecordCount(VTableName tableName){
         int recordCount=0;
         try {
 
@@ -113,17 +115,24 @@ public class TableService {
             ResultSet rs=st.executeQuery(sql);
             if (rs.next()){
                 recordCount=rs.getInt(1);
-                if(log.isDebugEnabled()){
+                if(log.isInfoEnabled()){
                     log.info(recordCount+"|");
                 }
             }
             rs.close();
             st.close();
-            conn.close();
         } catch (Exception e) {
             log.error("connection test error",e);
         }
-        return recordCount;
+        return new VTableRecordCount(recordCount);
+    }
+
+    public int getTablePageCount(VTableName tableName,VPage page){
+        VTableRecordCount count=getTableRecordCount(tableName);
+        BigDecimal b1=new BigDecimal(count.getRecordCount());
+        BigDecimal b2=new BigDecimal(page.getPageSize().getSize());
+        BigDecimal b3=b1.divide(b2).setScale(0,RoundingMode.CEILING);
+        return b3.intValue();
     }
 
     public List<TableColumnView> getTableViewColumns(List<VTableColumn> tableColumnList){
@@ -134,12 +143,17 @@ public class TableService {
         return tableColumnViews;
     }
 
-    public List<Map> getData(VTableName tableName, VPage VPage){
+    public VPage getData(VTableName tableName, VPage VPage){
         List<Map> tableDataList=new ArrayList<>();
         try {
+            VTableRecordCount tableRecordCount=getTableRecordCount(tableName);
+            VPageTotalElementsNumber pageTotalElementsNumber=new VPageTotalElementsNumber(tableRecordCount.getRecordCount());
+            VPage.setPageTotalElementsNumber(pageTotalElementsNumber);
             Connection conn= getDatabaseService().getvConnection().getConnection();
             Statement st=conn.createStatement();
             String sql="select * from "+tableName.getTableName();
+            sql=getPageSql(sql,VPage);
+
             ResultSet rs=st.executeQuery(sql);
 
             ResultSetMetaData metaData=rs.getMetaData();
@@ -152,11 +166,23 @@ public class TableService {
                 }
                 tableDataList.add(data);
             }
+            VPage.setData(tableDataList);
             rs.close();
             st.close();
         } catch (Exception e) {
             log.error("get table data error",e);
         }
-        return tableDataList;
+        return VPage;
+    }
+
+    public String getPageSql(String sql,VPage page){
+        String pageSql="";
+        if(page.getCurrentPageIndex().getIndex()==0){
+            pageSql=sql+" limit "+page.getPageSize().getSize();
+            return pageSql;
+        }
+
+        pageSql=sql+" limit "+page.getPageSize().getSize()+" OFFSET "+page.getCurrentPageIndex().getIndex()*page.getPageSize().getSize();
+        return pageSql;
     }
 }

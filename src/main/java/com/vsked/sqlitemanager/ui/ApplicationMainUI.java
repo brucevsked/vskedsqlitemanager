@@ -22,6 +22,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
@@ -39,6 +40,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +53,8 @@ public class ApplicationMainUI extends Application {
 
 	private static final Logger log = LoggerFactory.getLogger(ApplicationMainUI.class);
 
+	private Scene scene;
+
 	private ApplicationService applicationService=new ApplicationService();
 	private DatabaseService databaseService;
 
@@ -60,6 +64,14 @@ public class ApplicationMainUI extends Application {
 
 	public void setDatabaseService(DatabaseService databaseService) {
 		this.databaseService = databaseService;
+	}
+
+	public Scene getScene() {
+		return scene;
+	}
+
+	public void setScene(Scene scene) {
+		this.scene = scene;
 	}
 
 	public static void main(String[] args) {
@@ -194,8 +206,6 @@ public class ApplicationMainUI extends Application {
 
 		centerGridPane.add(tabPane,0,0);
 
-		VPage vTablePage =new VPage(new VPageIndex(0),new VPageSize(10));
-
 		systemViewTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem>() {
 			@Override
 			public void changed(ObservableValue<? extends TreeItem> paramObservableValue, TreeItem paramT1, TreeItem selectedItem) {
@@ -227,28 +237,33 @@ public class ApplicationMainUI extends Application {
 						Tab tab=new Tab(selectedItem.getValue().toString());
 						GridPane tableGridPane=new GridPane();
 
-						TableView<Map> tableView=new TableView<>();
-
-
-						TableService tableService=new TableService(getDatabaseService());
 						VTableName currentTableName=new VTableName(selectedItem.getValue().toString());
-						List<VTableColumn> tableColumns=tableService.getColumns(currentTableName);
-						List<TableColumnView> tableViewColumns=tableService.getTableViewColumns(tableColumns);
-						for(TableColumnView tableColumnView :tableViewColumns){
-							TableColumn<Map, String> keyColumn = new TableColumn<>(tableColumnView.getName());
-							keyColumn.setCellValueFactory(new MapValueFactory<>(tableColumnView.getName()));
-							tableView.getColumns().add(keyColumn);
-						}
 
-
-						List<Map> tableDatas=tableService.getData(currentTableName,vTablePage);
-						ObservableList<Map> dataList=FXCollections.observableArrayList(tableDatas);
-                        log.debug(dataList+"");
-						tableView.setItems(dataList);
-
-						tableGridPane.add(tableView,0,0);
+                        VPage page=new VPage(new VPageIndex(0),new VPageSize(10));
 
 						Pagination pagination=new Pagination();
+
+						TableService tableService=new TableService(getDatabaseService());
+						int pageCount= tableService.getTablePageCount(currentTableName,page);
+						pagination.setPageCount(pageCount);
+						pagination.setPageFactory(new Callback<Integer, Node>() {
+							@Override
+							public Node call(Integer pageIndex) {
+								log.info("PageIndex:"+pageIndex);
+
+								return createPage(new VPage(new VPageIndex(pageIndex),page.getPageSize()),currentTableName);
+							}
+						});
+
+
+						// pagination width change with window
+						getScene().widthProperty().addListener(new ChangeListener<Number>() {
+							@Override
+							public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+								pagination.setPrefWidth(newValue.doubleValue());
+							}
+						});
+
 						tableGridPane.add(pagination,0,1);//column,row
 
 
@@ -300,11 +315,12 @@ public class ApplicationMainUI extends Application {
 
 		openBt.setOnAction(fileOpenMenu.getOnAction());
 
+		scene = new Scene(content, 1000, 500);
+		setScene(scene);
 
-		Scene scene = new Scene(content, 1000, 500);
 
 		stage.titleProperty().bind(I18N.createStringBinding("window.title"));
-		stage.setScene(scene);
+		stage.setScene(getScene());
 
 		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			@Override
@@ -315,6 +331,32 @@ public class ApplicationMainUI extends Application {
 
 		stage.show();
 	}
+
+
+	private TableView<Map> createPage(VPage page,VTableName currentTableName) {
+
+		TableView<Map> tableView=new TableView<>();
+
+		TableService tableService=new TableService(getDatabaseService());
+		List<VTableColumn> tableColumns=tableService.getColumns(currentTableName);
+		List<TableColumnView> tableViewColumns=tableService.getTableViewColumns(tableColumns);
+		for(TableColumnView tableColumnView :tableViewColumns){
+			TableColumn<Map, String> keyColumn = new TableColumn<>(tableColumnView.getName());
+			keyColumn.setCellValueFactory(new MapValueFactory<>(tableColumnView.getName()));
+			tableView.getColumns().add(keyColumn);
+		}
+
+		VPage vTablePage =page;
+
+		vTablePage=tableService.getData(currentTableName,vTablePage);
+		List<Map> tableDatas=vTablePage.getData();
+		ObservableList<Map> dataList=FXCollections.observableArrayList(tableDatas);
+
+		tableView.setItems(dataList);
+		return tableView;
+	}
+
+
 
 	/**
 	 * sets the given Locale in the I18N class and keeps count of the number of switches.
