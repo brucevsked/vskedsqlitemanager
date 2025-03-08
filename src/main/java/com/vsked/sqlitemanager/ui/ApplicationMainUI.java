@@ -32,6 +32,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -54,6 +55,7 @@ public class ApplicationMainUI extends Application {
 	private static final Logger log = LoggerFactory.getLogger(ApplicationMainUI.class);
 
 	private Scene scene;
+	private int globalQueryTabCount=0;
 
 	private ApplicationService applicationService=new ApplicationService();
 	private DatabaseService databaseService;
@@ -64,6 +66,11 @@ public class ApplicationMainUI extends Application {
 
 	public void setDatabaseService(DatabaseService databaseService) {
 		this.databaseService = databaseService;
+	}
+
+	public int getGlobalQueryTabCount() {
+		this.globalQueryTabCount=this.globalQueryTabCount+1;
+		return globalQueryTabCount;
 	}
 
 	public Scene getScene() {
@@ -149,7 +156,6 @@ public class ApplicationMainUI extends Application {
 		Button chineseBt=I18N.buttonForKey("button.chinese");
 		Button exitBt=I18N.buttonForKey("button.exit");
 
-
 		englishBt.setOnAction(englishMenu.getOnAction());
 
 		chineseBt.setOnAction(chineseMenu.getOnAction());
@@ -193,6 +199,27 @@ public class ApplicationMainUI extends Application {
 		content.setCenter(centerGridPane);
 		TabPane tabPane=new TabPane();
 
+		//tabPane.setMinWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
+		tabPane.setMaxWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
+
+		queryBt.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent actionEvent) {
+				Tab tab=new Tab("Query"+getGlobalQueryTabCount());
+				GridPane queryTabGridPane=new GridPane();
+				Button runQueryButton=I18N.buttonForKey("button.runQuery");
+				queryTabGridPane.add(runQueryButton,0,0);
+				TextArea ta=new TextArea();
+
+				queryTabGridPane.add(ta,0,1);
+
+				tab.setContent(queryTabGridPane);
+				tabPane.getTabs().add(tab);
+				tabPane.getSelectionModel().select(tab);
+				ta.requestFocus();
+			}
+		});
+
 		tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
 					if (newTab != null) {
 						List<TreeItem<String>> tableItems=tablesItem.getChildren();
@@ -233,7 +260,7 @@ public class ApplicationMainUI extends Application {
 				if(selectedItem.getParent().getValue().equals(tablesItem.getValue())){
 					//when not exist table tab
 					if(isExistTab==false){
-						tabPane.setMinWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
+
 						Tab tab=new Tab(selectedItem.getValue().toString());
 						GridPane tableGridPane=new GridPane();
 

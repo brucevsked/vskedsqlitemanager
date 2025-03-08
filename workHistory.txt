@@ -154,9 +154,17 @@ update screen shoot to screen shoot folder.
 today is so cool,I thought everything will be all right.
 Learn english everyday is so happy.
 I need a job in china shandong province jinan city.
+--------------------------------------------------------------------------------
+20250307
 
+forgot write code today
+It's too busy
 
+--------------------------------------------------------------------------------
+20250308
 
+add more data to sample database
+add create query button event
 
 
 
