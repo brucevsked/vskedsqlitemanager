@@ -1,8 +1,7 @@
 package com.vsked.sqlitemanager.ui;
 
-import com.vsked.sqlitemanager.domain.I18N;
+import com.vsked.sqlitemanager.services.I18N;
 import com.vsked.sqlitemanager.domain.VPage;
-import com.vsked.sqlitemanager.domain.VConnection;
 import com.vsked.sqlitemanager.domain.VDatabaseFile;
 import com.vsked.sqlitemanager.domain.VPageIndex;
 import com.vsked.sqlitemanager.domain.VPageSize;
@@ -24,6 +23,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -44,7 +44,6 @@ import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -205,6 +204,15 @@ public class ApplicationMainUI extends Application {
 		queryBt.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent actionEvent) {
+				if(log.isTraceEnabled()) {
+					log.trace("You click the query button from toolbar");
+				}
+				if(getDatabaseService()==null){
+					Alert alert = I18N.alertForKey(Alert.AlertType.INFORMATION,"alert.notExitOpenDatabaseFile.title","alert.notExitOpenDatabaseFile.headerText","alert.notExitOpenDatabaseFile.contentText");
+					alert.show();
+					return;
+				}
+
 				Tab tab=new Tab("Query"+getGlobalQueryTabCount());
 				GridPane queryTabGridPane=new GridPane();
 				Button runQueryButton=I18N.buttonForKey("button.runQuery");
@@ -236,9 +244,10 @@ public class ApplicationMainUI extends Application {
 		systemViewTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem>() {
 			@Override
 			public void changed(ObservableValue<? extends TreeItem> paramObservableValue, TreeItem paramT1, TreeItem selectedItem) {
-
+				if(log.isTraceEnabled()) {
+					log.trace("You click the tree Item from system tree view");
+				}
 				if(log.isDebugEnabled()){
-					System.out.println(selectedItem);
 					log.debug(selectedItem+"");
 				}
 

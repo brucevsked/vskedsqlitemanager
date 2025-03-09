@@ -1,9 +1,10 @@
-package com.vsked.sqlitemanager.domain;
+package com.vsked.sqlitemanager.services;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
@@ -145,6 +146,14 @@ public class I18N {
         TreeItem<String> treeItem=new TreeItem<String>();
         treeItem.valueProperty().bind(createStringBinding(key, args));
         return treeItem;
+    }
+
+    public static Alert alertForKey(Alert.AlertType alertType, final String titleKey, final String headerTextKey, final String contentTextKey, final Object... args){
+        Alert alert = new Alert(alertType);
+        alert.titleProperty().bind(createStringBinding(titleKey,args));
+        alert.headerTextProperty().bind(createStringBinding(headerTextKey,args));
+        alert.contentTextProperty().bind(createStringBinding(contentTextKey,args));
+        return alert;
     }
 
 
