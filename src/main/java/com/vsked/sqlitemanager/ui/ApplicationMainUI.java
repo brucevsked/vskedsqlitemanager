@@ -25,8 +25,10 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -213,11 +215,52 @@ public class ApplicationMainUI extends Application {
 					return;
 				}
 
-				Tab tab=new Tab("Query"+getGlobalQueryTabCount());
+				int queryCount=getGlobalQueryTabCount();
+
+				Tab tab=new Tab("Query"+queryCount);
 				GridPane queryTabGridPane=new GridPane();
 				Button runQueryButton=I18N.buttonForKey("button.runQuery");
+				Button stopQueryButton=I18N.buttonForKey("button.stopQuery");
 				queryTabGridPane.add(runQueryButton,0,0);
+				queryTabGridPane.add(stopQueryButton,1,0);
+
+
+				runQueryButton.setOnAction(new EventHandler<ActionEvent>() {
+					@Override
+					public void handle(ActionEvent actionEvent) {
+						if(log.isTraceEnabled()) {
+							log.trace("You click run query button from query"+queryCount);
+						}
+					}
+				});
+
+				stopQueryButton.setOnAction(new EventHandler<ActionEvent>() {
+					@Override
+					public void handle(ActionEvent actionEvent) {
+						if(log.isTraceEnabled()) {
+							log.trace("You click stop query button from query grid");
+						}
+					}
+				});
+
+				// create a menu
+				ContextMenu contextMenu = new ContextMenu();
+
+				// create menuitems
+				MenuItem menuItem1 = new MenuItem("run current selected sql");
+				MenuItem menuItem2 = new MenuItem("cut");
+				MenuItem menuItem3 = new MenuItem("copy");
+				MenuItem menuItem4 = new MenuItem("paste");
+
+				// add menu items to menu
+				contextMenu.getItems().add(menuItem1);
+				contextMenu.getItems().add(menuItem2);
+				contextMenu.getItems().add(menuItem3);
+				contextMenu.getItems().add(menuItem4);
+
 				TextArea ta=new TextArea();
+
+				ta.setContextMenu(contextMenu);
 
 				queryTabGridPane.add(ta,0,1);
 
