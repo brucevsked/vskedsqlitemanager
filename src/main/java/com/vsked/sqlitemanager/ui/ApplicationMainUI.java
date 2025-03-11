@@ -247,16 +247,18 @@ public class ApplicationMainUI extends Application {
 				ContextMenu contextMenu = new ContextMenu();
 
 				// create menuitems
-				MenuItem menuItem1 = new MenuItem("run current selected sql");
-				MenuItem menuItem2 = new MenuItem("cut");
-				MenuItem menuItem3 = new MenuItem("copy");
-				MenuItem menuItem4 = new MenuItem("paste");
+				MenuItem runCurrentSelectedSqlMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.runCurrentSelectedSql");
+				MenuItem cutMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.cut");
+				MenuItem copyMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.copy");
+				MenuItem pasteMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.paste");
+				MenuItem selectAllMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.selectAll");
 
 				// add menu items to menu
-				contextMenu.getItems().add(menuItem1);
-				contextMenu.getItems().add(menuItem2);
-				contextMenu.getItems().add(menuItem3);
-				contextMenu.getItems().add(menuItem4);
+				contextMenu.getItems().add(runCurrentSelectedSqlMenuItem);
+				contextMenu.getItems().add(cutMenuItem);
+				contextMenu.getItems().add(copyMenuItem);
+				contextMenu.getItems().add(pasteMenuItem);
+				contextMenu.getItems().add(selectAllMenuItem);
 
 				TextArea ta=new TextArea();
 
