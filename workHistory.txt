@@ -190,7 +190,12 @@ if our network is very well we can let's old device has powerful energy.
 From today I will commit every saturday or sunday.
 because I will work for my old friend.
 
+--------------------------------------------------------------------------------
+20250318
 
+rename querybutton to new query button
+change computer and I don't know why the tab not show in new laptop
+so I just commit my new code
 
 I will install a virtual machine.
 because there was a lot of virus in internet

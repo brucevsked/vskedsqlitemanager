@@ -152,7 +152,7 @@ public class ApplicationMainUI extends Application {
 
 		ToolBar toolBar=new ToolBar();
 		Button openBt=I18N.buttonForKey("button.open");
-		Button queryBt=I18N.buttonForKey("button.newQuery");
+		Button newQueryBt=I18N.buttonForKey("button.newQuery");
 		Button englishBt=I18N.buttonForKey("button.english");
 		Button chineseBt=I18N.buttonForKey("button.chinese");
 		Button exitBt=I18N.buttonForKey("button.exit");
@@ -164,7 +164,7 @@ public class ApplicationMainUI extends Application {
 		exitBt.setOnAction(fileExitMenu.getOnAction());
 
 		toolBar.getItems().add(openBt);
-		toolBar.getItems().add(queryBt);
+		toolBar.getItems().add(newQueryBt);
 		toolBar.getItems().add(englishBt);
 		toolBar.getItems().add(chineseBt);
 		toolBar.getItems().add(exitBt);
@@ -203,11 +203,11 @@ public class ApplicationMainUI extends Application {
 		//tabPane.setMinWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
 		tabPane.setMaxWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
 
-		queryBt.setOnAction(new EventHandler<ActionEvent>() {
+		newQueryBt.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent actionEvent) {
 				if(log.isTraceEnabled()) {
-					log.trace("You click the query button from toolbar");
+					log.trace("You click the new query button from toolbar");
 				}
 				if(getDatabaseService()==null){
 					Alert alert = I18N.alertForKey(Alert.AlertType.INFORMATION,"alert.notExitOpenDatabaseFile.title","alert.notExitOpenDatabaseFile.headerText","alert.notExitOpenDatabaseFile.contentText");
