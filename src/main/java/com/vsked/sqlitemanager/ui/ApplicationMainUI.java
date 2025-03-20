@@ -46,6 +46,8 @@ import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -95,7 +97,7 @@ public class ApplicationMainUI extends Application {
 	public void start(Stage stage) throws Exception {
 
 		// create content
-		BorderPane content = new BorderPane();
+		BorderPane borderPane = new BorderPane();
 
 		MenuBar menuBar = new MenuBar();
 		menuBar.setMinWidth(stage.getMaxWidth());
@@ -175,7 +177,7 @@ public class ApplicationMainUI extends Application {
 		topGridPane.add(menuBar,0,0);
 		topGridPane.add(toolBar,0,1);
 
-		content.setTop(topGridPane);
+		borderPane.setTop(topGridPane);
 
 		GridPane leftGridPane=new GridPane();
 		TreeView<String> systemViewTree=new TreeView<>();
@@ -197,11 +199,12 @@ public class ApplicationMainUI extends Application {
 
 
 		GridPane centerGridPane=new GridPane();
-		content.setCenter(centerGridPane);
+
 		TabPane tabPane=new TabPane();
 
 		//tabPane.setMinWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
 		tabPane.setMaxWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
+
 
 		newQueryBt.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
@@ -286,6 +289,11 @@ public class ApplicationMainUI extends Application {
 
 		centerGridPane.add(tabPane,0,0);
 
+		centerGridPane.setStyle("-fx-background-color: #0000ff");
+
+		borderPane.setCenter(centerGridPane);
+
+
 		systemViewTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem>() {
 			@Override
 			public void changed(ObservableValue<? extends TreeItem> paramObservableValue, TreeItem paramT1, TreeItem selectedItem) {
@@ -352,6 +360,8 @@ public class ApplicationMainUI extends Application {
 						tab.setClosable(true);
 						tab.setId(selectedItem.getValue()+"");
 
+						log.info("tab id is:{}",selectedItem.getValue());
+
 						tabPane.getTabs().add(tab);
 
 						tabPane.getSelectionModel().select(tab);
@@ -368,7 +378,7 @@ public class ApplicationMainUI extends Application {
 
 
 		leftGridPane.add(systemViewTree,0,0);
-		content.setLeft(leftGridPane);
+		borderPane.setLeft(leftGridPane);
 
 		fileOpenMenu.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -396,7 +406,7 @@ public class ApplicationMainUI extends Application {
 
 		openBt.setOnAction(fileOpenMenu.getOnAction());
 
-		scene = new Scene(content, 1000, 500);
+		scene = new Scene(borderPane, 1000, 500);
 		setScene(scene);
 
 
