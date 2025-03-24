@@ -39,8 +39,10 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.MapValueFactory;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
@@ -98,6 +100,7 @@ public class ApplicationMainUI extends Application {
 
 		// create content
 		BorderPane borderPane = new BorderPane();
+
 
 		MenuBar menuBar = new MenuBar();
 		menuBar.setMinWidth(stage.getMaxWidth());
@@ -199,12 +202,11 @@ public class ApplicationMainUI extends Application {
 
 
 		GridPane centerGridPane=new GridPane();
+		centerGridPane.setMinWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
+		centerGridPane.setMinHeight(leftGridPane.getMinHeight());
 
-		TabPane tabPane=new TabPane();
 
-		//tabPane.setMinWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
-		tabPane.setMaxWidth(stage.getMaxWidth()-leftGridPane.getMaxWidth());
-
+		TabPane centerTabPane=new TabPane();
 
 		newQueryBt.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
@@ -219,8 +221,9 @@ public class ApplicationMainUI extends Application {
 				}
 
 				int queryCount=getGlobalQueryTabCount();
-
-				Tab tab=new Tab("Query"+queryCount);
+                String queryTabId="Query"+queryCount;
+				Tab tab=new Tab(queryTabId);
+				tab.setId(queryTabId);
 				GridPane queryTabGridPane=new GridPane();
 				Button runQueryButton=I18N.buttonForKey("button.runQuery");
 				Button stopQueryButton=I18N.buttonForKey("button.stopQuery");
@@ -270,13 +273,13 @@ public class ApplicationMainUI extends Application {
 				queryTabGridPane.add(ta,0,1);
 
 				tab.setContent(queryTabGridPane);
-				tabPane.getTabs().add(tab);
-				tabPane.getSelectionModel().select(tab);
+				centerTabPane.getTabs().add(tab);
+				centerTabPane.getSelectionModel().select(tab);
 				ta.requestFocus();
 			}
 		});
 
-		tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
+		centerTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
 					if (newTab != null) {
 						List<TreeItem<String>> tableItems=tablesItem.getChildren();
 						for(TreeItem<String> item:tableItems){
@@ -287,11 +290,12 @@ public class ApplicationMainUI extends Application {
 					}
 		});
 
-		centerGridPane.add(tabPane,0,0);
+		centerGridPane.add(centerTabPane,0,0);
 
 		centerGridPane.setStyle("-fx-background-color: #0000ff");
-
+		centerGridPane.setVisible(true);
 		borderPane.setCenter(centerGridPane);
+		borderPane.setVisible(true);
 
 
 		systemViewTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem>() {
@@ -304,7 +308,7 @@ public class ApplicationMainUI extends Application {
 					log.debug(selectedItem+"");
 				}
 
-				List<Tab> oldTabList=tabPane.getTabs();
+				List<Tab> oldTabList=centerTabPane.getTabs();
 				boolean isExistTab=false;
 
 				for(Tab tab:oldTabList){
@@ -314,7 +318,7 @@ public class ApplicationMainUI extends Application {
 
 					if(tab.getId().equals(selectedItem.getValue())){
 						isExistTab=true;
-						tabPane.getSelectionModel().select(tab);
+						centerTabPane.getSelectionModel().select(tab);
 						break;
 					}
 				}
@@ -346,12 +350,12 @@ public class ApplicationMainUI extends Application {
 
 
 						// pagination width change with window
-						getScene().widthProperty().addListener(new ChangeListener<Number>() {
-							@Override
-							public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-								pagination.setPrefWidth(newValue.doubleValue());
-							}
-						});
+//						getScene().widthProperty().addListener(new ChangeListener<Number>() {
+//							@Override
+//							public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+//								pagination.setPrefWidth(newValue.doubleValue());
+//							}
+//						});
 
 						tableGridPane.add(pagination,0,1);//column,row
 
@@ -362,9 +366,9 @@ public class ApplicationMainUI extends Application {
 
 						log.info("tab id is:{}",selectedItem.getValue());
 
-						tabPane.getTabs().add(tab);
+						centerTabPane.getTabs().add(tab);
 
-						tabPane.getSelectionModel().select(tab);
+						centerTabPane.getSelectionModel().select(tab);
 					}
 
 				}
@@ -411,7 +415,7 @@ public class ApplicationMainUI extends Application {
 
 
 		stage.titleProperty().bind(I18N.createStringBinding("window.title"));
-		stage.setScene(getScene());
+		stage.setScene(scene);
 
 		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			@Override

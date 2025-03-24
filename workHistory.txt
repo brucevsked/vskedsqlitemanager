@@ -197,6 +197,16 @@ rename querybutton to new query button
 change computer and I don't know why the tab not show in new laptop
 so I just commit my new code
 
+--------------------------------------------------------------------------------
+20250324
+
+I have been fixed the bug of tab not view.
+The reason is I don't set the center tab panel width and height.
+I don't know why in another machine tab can show.
+Maybe it's different system.In my home comuter system is window11 professional.
+In my company laptop use window10 enterprise version.
+
+
 I will install a virtual machine.
 because there was a lot of virus in internet
 I can try virtualbox or vmware or other sandbox in windows11
