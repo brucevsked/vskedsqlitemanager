@@ -206,6 +206,16 @@ I don't know why in another machine tab can show.
 Maybe it's different system.In my home comuter system is window11 professional.
 In my company laptop use window10 enterprise version.
 
+--------------------------------------------------------------------------------
+20250401
+
+this computer is think pad p50,It's very powerful.
+optimize import class in application main window.
+set menu items in query text area .
+add click event for menu item.
+
+
+
 
 I will install a virtual machine.
 because there was a lot of virus in internet

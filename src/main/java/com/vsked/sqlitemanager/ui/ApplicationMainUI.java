@@ -39,17 +39,13 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.MapValueFactory;
-import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.swing.*;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -61,6 +57,8 @@ public class ApplicationMainUI extends Application {
 
 	private Scene scene;
 	private int globalQueryTabCount=0;
+	private TextArea currentQueryTextArea;
+
 
 	private ApplicationService applicationService=new ApplicationService();
 	private DatabaseService databaseService;
@@ -76,6 +74,14 @@ public class ApplicationMainUI extends Application {
 	public int getGlobalQueryTabCount() {
 		this.globalQueryTabCount=this.globalQueryTabCount+1;
 		return globalQueryTabCount;
+	}
+
+	public TextArea getCurrentQueryTextArea() {
+		return currentQueryTextArea;
+	}
+
+	public void setCurrentQueryTextArea(TextArea currentQueryTextArea) {
+		this.currentQueryTextArea = currentQueryTextArea;
 	}
 
 	public Scene getScene() {
@@ -208,6 +214,8 @@ public class ApplicationMainUI extends Application {
 
 		TabPane centerTabPane=new TabPane();
 
+		//TODO when change query set current text area component
+
 		newQueryBt.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent actionEvent) {
@@ -249,6 +257,7 @@ public class ApplicationMainUI extends Application {
 					}
 				});
 
+				TextArea ta=new TextArea();
 				// create a menu
 				ContextMenu contextMenu = new ContextMenu();
 
@@ -259,6 +268,49 @@ public class ApplicationMainUI extends Application {
 				MenuItem pasteMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.paste");
 				MenuItem selectAllMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.selectAll");
 
+				cutMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+					public void handle(ActionEvent actionEvent) {
+						if(log.isTraceEnabled()){
+							log.trace("you click cut menu from contextMenu");
+						}
+
+					}
+				});
+
+				copyMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+					public void handle(ActionEvent actionEvent) {
+						if(log.isTraceEnabled()){
+							log.trace("you click copy menu from contextMenu");
+						}
+
+					}
+				});
+
+				pasteMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+					public void handle(ActionEvent actionEvent) {
+						if(log.isTraceEnabled()){
+							log.trace("you click paste menu from contextMenu");
+						}
+
+					}
+				});
+
+				selectAllMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+					public void handle(ActionEvent actionEvent) {
+						if(log.isTraceEnabled()){
+							log.trace("you click select all menu from contextMenu");
+						}
+
+						if(log.isDebugEnabled()){
+							log.debug("{}",actionEvent.getSource());
+						}
+
+						MenuItem tempMenu= (MenuItem) actionEvent.getSource();
+						getCurrentQueryTextArea().selectAll();
+
+					}
+				});
+
 				// add menu items to menu
 				contextMenu.getItems().add(runCurrentSelectedSqlMenuItem);
 				contextMenu.getItems().add(cutMenuItem);
@@ -266,7 +318,7 @@ public class ApplicationMainUI extends Application {
 				contextMenu.getItems().add(pasteMenuItem);
 				contextMenu.getItems().add(selectAllMenuItem);
 
-				TextArea ta=new TextArea();
+
 
 				ta.setContextMenu(contextMenu);
 
@@ -276,6 +328,7 @@ public class ApplicationMainUI extends Application {
 				centerTabPane.getTabs().add(tab);
 				centerTabPane.getSelectionModel().select(tab);
 				ta.requestFocus();
+				setCurrentQueryTextArea(ta);
 			}
 		});
 
