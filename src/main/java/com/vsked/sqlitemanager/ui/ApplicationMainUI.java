@@ -22,6 +22,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -229,9 +230,10 @@ public class ApplicationMainUI extends Application {
 				}
 
 				int queryCount=getGlobalQueryTabCount();
-                String queryTabId="Query"+queryCount;
+                String queryTabId=I18N.get("tab.query")+queryCount;
 				Tab tab=new Tab(queryTabId);
-				tab.setId(queryTabId);
+				tab.setId("Query"+queryCount);
+				tab.setText(queryTabId);
 				GridPane queryTabGridPane=new GridPane();
 				Button runQueryButton=I18N.buttonForKey("button.runQuery");
 				Button stopQueryButton=I18N.buttonForKey("button.stopQuery");
@@ -333,7 +335,23 @@ public class ApplicationMainUI extends Application {
 		});
 
 		centerTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
-					if (newTab != null) {
+			log.trace("you have change panel ---------------");
+			log.debug("current tab is:{}",newTab.getText());
+			String newPanelId=newTab.getId();
+			if(newPanelId.indexOf("Query")>=0 && newTab!=null){
+				log.trace("-------------------------");
+				//TODO request focus
+				Parent tabNode= (Parent) newTab.getContent();
+				tabNode.getChildrenUnmodifiable().forEach(child->{
+					if(child instanceof TextArea){
+						TextArea temp1= (TextArea) child;
+						setCurrentQueryTextArea(temp1);
+						temp1.requestFocus();
+
+					}
+				});
+			}
+					if (newTab != null && newPanelId.indexOf(I18N.get("tab.query"))<0) {
 						List<TreeItem<String>> tableItems=tablesItem.getChildren();
 						for(TreeItem<String> item:tableItems){
 							if(item.getValue().equals(newTab.getText())){

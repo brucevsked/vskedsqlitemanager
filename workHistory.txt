@@ -214,7 +214,10 @@ optimize import class in application main window.
 set menu items in query text area .
 add click event for menu item.
 
+--------------------------------------------------------------------------------
+20250409
 
+write little code for query tab
 
 
 I will install a virtual machine.
