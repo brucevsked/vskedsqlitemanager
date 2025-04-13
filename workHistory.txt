@@ -219,6 +219,11 @@ add click event for menu item.
 
 write little code for query tab
 
+--------------------------------------------------------------------------------
+20250413
+
+I get the textarea but can't focus it
+
 
 I will install a virtual machine.
 because there was a lot of virus in internet
