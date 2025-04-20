@@ -40,6 +40,8 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.MapValueFactory;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
@@ -278,7 +280,8 @@ public class ApplicationMainUI extends Application {
                         if (log.isTraceEnabled()) {
                             log.trace("you click cut menu from contextMenu");
                         }
-
+                        TextArea textArea=getCurrentQueryTextArea();
+                        textArea.cut();
                     }
                 });
 
@@ -286,6 +289,15 @@ public class ApplicationMainUI extends Application {
                     public void handle(ActionEvent actionEvent) {
                         if (log.isTraceEnabled()) {
                             log.trace("you click copy menu from contextMenu");
+                        }
+                        TextArea textArea=getCurrentQueryTextArea();
+                        if (!textArea.getSelectedText().isEmpty()) {
+                            ClipboardContent content = new ClipboardContent();
+                            content.putString(textArea.getSelectedText());
+                            Clipboard clipboard = Clipboard.getSystemClipboard();
+                            clipboard.setContent(content);
+                        } else {
+                            log.trace("you click copy menu from contextMenu.No text selected to copy.");
                         }
 
                     }
@@ -296,7 +308,8 @@ public class ApplicationMainUI extends Application {
                         if (log.isTraceEnabled()) {
                             log.trace("you click paste menu from contextMenu");
                         }
-
+                        TextArea textArea=getCurrentQueryTextArea();
+                        textArea.paste();
                     }
                 });
 
@@ -309,20 +322,21 @@ public class ApplicationMainUI extends Application {
                         if (log.isDebugEnabled()) {
                             log.debug("{}", actionEvent.getSource());
                         }
+                        TextArea textArea=getCurrentQueryTextArea();
+                        textArea.selectAll();
 
-                        MenuItem tempMenu = (MenuItem) actionEvent.getSource();
-                        getCurrentQueryTextArea().selectAll();
+//                        MenuItem tempMenu = (MenuItem) actionEvent.getSource();
+//                        getCurrentQueryTextArea().selectAll();
 
                     }
                 });
 
                 // add menu items to menu
+                contextMenu.getItems().add(selectAllMenuItem);
                 contextMenu.getItems().add(runCurrentSelectedSqlMenuItem);
                 contextMenu.getItems().add(cutMenuItem);
                 contextMenu.getItems().add(copyMenuItem);
                 contextMenu.getItems().add(pasteMenuItem);
-                contextMenu.getItems().add(selectAllMenuItem);
-
 
                 ta.setContextMenu(contextMenu);
 

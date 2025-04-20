@@ -223,7 +223,10 @@ write little code for query tab
 20250413
 
 I get the textarea but can't focus it
+--------------------------------------------------------------------------------
+20250420
 
+now I can cut,copy,selected all in query textarea.
 
 I will install a virtual machine.
 because there was a lot of virus in internet
