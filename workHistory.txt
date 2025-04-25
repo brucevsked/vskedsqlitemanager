@@ -228,6 +228,13 @@ I get the textarea but can't focus it
 
 now I can cut,copy,selected all in query textarea.
 
+--------------------------------------------------------------------------------
+20250422
+
+optimize log and info code.
+today is so hot,I felt tired.work is very hard,how long time I can go 
+another place
+
 I will install a virtual machine.
 because there was a lot of virus in internet
 I can try virtualbox or vmware or other sandbox in windows11

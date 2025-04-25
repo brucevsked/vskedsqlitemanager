@@ -16,13 +16,9 @@ import com.vsked.sqlitemanager.services.TableService;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -45,11 +41,8 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -106,11 +99,10 @@ public class ApplicationMainUI extends Application {
 
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage){
 
         // create content
         BorderPane borderPane = new BorderPane();
-
 
         MenuBar menuBar = new MenuBar();
         menuBar.setMinWidth(stage.getMaxWidth());
@@ -120,40 +112,32 @@ public class ApplicationMainUI extends Application {
         Menu fileExitMenu = I18N.menuForKey("menuItem.exit");
 
 
-        fileExitMenu.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
-                if (log.isTraceEnabled()) {
-                    log.trace("You click the file exit menu from menu Item");
-                }
-                applicationService.exit();
+        fileExitMenu.setOnAction(event -> {
+            if (log.isTraceEnabled()) {
+                log.trace("You click the file exit menu from menu Item");
             }
+            log.info("{}",event.toString());
+            applicationService.exit();
         });
 
         Menu languageMenu = I18N.menuForKey("menu.language");
         Menu englishMenu = I18N.menuForKey("menu.english");
         Menu chineseMenu = I18N.menuForKey("menu.chinese");
 
-        englishMenu.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                if (log.isTraceEnabled()) {
-                    log.trace("You click the english menu from menu Item");
-                }
-                switchLanguage(Locale.ENGLISH);
+        englishMenu.setOnAction(event -> {
+            if (log.isTraceEnabled()) {
+                log.trace("You click the english menu from menu Item");
             }
+            switchLanguage(Locale.ENGLISH);
+            log.info("{}",event);
         });
 
-        chineseMenu.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
-                if (log.isTraceEnabled()) {
-                    log.trace("You click the chinese menu from menu Item");
-                }
-                switchLanguage(Locale.CHINESE);
+        chineseMenu.setOnAction(event -> {
+            if (log.isTraceEnabled()) {
+                log.trace("You click the chinese menu from menu Item");
             }
+            switchLanguage(Locale.CHINESE);
+            log.info("{}",event);
         });
 
         fileMenu.getItems().add(fileOpenMenu);
@@ -220,142 +204,146 @@ public class ApplicationMainUI extends Application {
 
         //TODO when change query set current text area component
 
-        newQueryBt.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                if (log.isTraceEnabled()) {
-                    log.trace("You click the new query button from toolbar");
-                }
-                if (getDatabaseService() == null) {
-                    Alert alert = I18N.alertForKey(Alert.AlertType.INFORMATION, "alert.notExitOpenDatabaseFile.title", "alert.notExitOpenDatabaseFile.headerText", "alert.notExitOpenDatabaseFile.contentText");
-                    alert.show();
-                    return;
-                }
-
-                int queryCount = getGlobalQueryTabCount();
-                String queryTabId = I18N.get("tab.query") + queryCount;
-                Tab tab = new Tab(queryTabId);
-                tab.setId("Query" + queryCount);
-                tab.setText(queryTabId);
-                GridPane queryTabGridPane = new GridPane();
-                Button runQueryButton = I18N.buttonForKey("button.runQuery");
-                Button stopQueryButton = I18N.buttonForKey("button.stopQuery");
-                queryTabGridPane.add(runQueryButton, 0, 0);
-                queryTabGridPane.add(stopQueryButton, 1, 0);
-
-
-                runQueryButton.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent actionEvent) {
-                        if (log.isTraceEnabled()) {
-                            log.trace("You click run query button from query" + queryCount);
-                        }
-                    }
-                });
-
-                stopQueryButton.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent actionEvent) {
-                        if (log.isTraceEnabled()) {
-                            log.trace("You click stop query button from query grid");
-                        }
-                    }
-                });
-
-                TextArea ta = new TextArea();
-				ta.setId("ta"+queryCount);
-				ta.setFocusTraversable(true); //set can get focus
-                // create a menu
-                ContextMenu contextMenu = new ContextMenu();
-
-                // create menuitems
-                MenuItem runCurrentSelectedSqlMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.runCurrentSelectedSql");
-                MenuItem cutMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.cut");
-                MenuItem copyMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.copy");
-                MenuItem pasteMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.paste");
-                MenuItem selectAllMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.selectAll");
-
-                cutMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-                    public void handle(ActionEvent actionEvent) {
-                        if (log.isTraceEnabled()) {
-                            log.trace("you click cut menu from contextMenu");
-                        }
-                        TextArea textArea=getCurrentQueryTextArea();
-                        textArea.cut();
-                    }
-                });
-
-                copyMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-                    public void handle(ActionEvent actionEvent) {
-                        if (log.isTraceEnabled()) {
-                            log.trace("you click copy menu from contextMenu");
-                        }
-                        TextArea textArea=getCurrentQueryTextArea();
-                        if (!textArea.getSelectedText().isEmpty()) {
-                            ClipboardContent content = new ClipboardContent();
-                            content.putString(textArea.getSelectedText());
-                            Clipboard clipboard = Clipboard.getSystemClipboard();
-                            clipboard.setContent(content);
-                        } else {
-                            log.trace("you click copy menu from contextMenu.No text selected to copy.");
-                        }
-
-                    }
-                });
-
-                pasteMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-                    public void handle(ActionEvent actionEvent) {
-                        if (log.isTraceEnabled()) {
-                            log.trace("you click paste menu from contextMenu");
-                        }
-                        TextArea textArea=getCurrentQueryTextArea();
-                        textArea.paste();
-                    }
-                });
-
-                selectAllMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-                    public void handle(ActionEvent actionEvent) {
-                        if (log.isTraceEnabled()) {
-                            log.trace("you click select all menu from contextMenu");
-                        }
-
-                        if (log.isDebugEnabled()) {
-                            log.debug("{}", actionEvent.getSource());
-                        }
-                        TextArea textArea=getCurrentQueryTextArea();
-                        textArea.selectAll();
-
-//                        MenuItem tempMenu = (MenuItem) actionEvent.getSource();
-//                        getCurrentQueryTextArea().selectAll();
-
-                    }
-                });
-
-                // add menu items to menu
-                contextMenu.getItems().add(selectAllMenuItem);
-                contextMenu.getItems().add(runCurrentSelectedSqlMenuItem);
-                contextMenu.getItems().add(cutMenuItem);
-                contextMenu.getItems().add(copyMenuItem);
-                contextMenu.getItems().add(pasteMenuItem);
-
-                ta.setContextMenu(contextMenu);
-
-                queryTabGridPane.add(ta, 0, 1);
-
-                tab.setContent(queryTabGridPane);
-                centerTabPane.getTabs().add(tab);
-                centerTabPane.getSelectionModel().select(tab);
-                ta.requestFocus();
-                setCurrentQueryTextArea(ta);
+        newQueryBt.setOnAction(actionEvent -> {
+            if (log.isTraceEnabled()) {
+                log.trace("You click the new query button from toolbar");
             }
+
+            log.info("{}",actionEvent);
+
+            if (getDatabaseService() == null) {
+                Alert alert = I18N.alertForKey(Alert.AlertType.INFORMATION, "alert.notExitOpenDatabaseFile.title", "alert.notExitOpenDatabaseFile.headerText", "alert.notExitOpenDatabaseFile.contentText");
+                alert.show();
+                return;
+            }
+
+            int queryCount = getGlobalQueryTabCount();
+            String queryTabId = I18N.get("tab.query") + queryCount;
+            Tab tab = new Tab(queryTabId);
+            tab.setId("Query" + queryCount);
+            tab.setText(queryTabId);
+            GridPane queryTabGridPane = new GridPane();
+            Button runQueryButton = I18N.buttonForKey("button.runQuery");
+            Button stopQueryButton = I18N.buttonForKey("button.stopQuery");
+            queryTabGridPane.add(runQueryButton, 0, 0);
+            queryTabGridPane.add(stopQueryButton, 1, 0);
+
+
+            runQueryButton.setOnAction(actionEvent6 -> {
+                if (log.isTraceEnabled()) {
+                    log.trace("You click run query button from query {}" ,queryCount);
+                }
+
+                log.info("{}",actionEvent6);
+
+            });
+
+            stopQueryButton.setOnAction(actionEvent5 -> {
+                if (log.isTraceEnabled()) {
+                    log.trace("You click stop query button from query grid");
+                }
+
+                log.info("{}",actionEvent5);
+
+            });
+
+            TextArea ta = new TextArea();
+            ta.setId("ta"+queryCount);
+            ta.setFocusTraversable(true); //set can get focus
+            // create a menu
+            ContextMenu contextMenu = new ContextMenu();
+
+            // create menuitems
+            MenuItem runCurrentSelectedSqlMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.runCurrentSelectedSql");
+            MenuItem cutMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.cut");
+            MenuItem copyMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.copy");
+            MenuItem pasteMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.paste");
+            MenuItem selectAllMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.selectAll");
+
+            cutMenuItem.setOnAction(actionEvent4 -> {
+
+                if (log.isTraceEnabled()) {
+                    log.trace("you click cut menu from contextMenu");
+                }
+
+                log.info("{}",actionEvent4);
+
+                TextArea textArea = getCurrentQueryTextArea();
+                textArea.cut();
+            });
+
+            copyMenuItem.setOnAction(actionEvent3 -> {
+                if (log.isTraceEnabled()) {
+                    log.trace("you click copy menu from contextMenu");
+                }
+
+                log.info("{}",actionEvent3);
+
+                TextArea textArea = getCurrentQueryTextArea();
+
+                if (!textArea.getSelectedText().isEmpty()) {
+                    ClipboardContent content = new ClipboardContent();
+                    content.putString(textArea.getSelectedText());
+                    Clipboard clipboard = Clipboard.getSystemClipboard();
+                    clipboard.setContent(content);
+                } else {
+                    log.trace("you click copy menu from contextMenu.No text selected to copy.");
+                }
+
+            });
+
+            pasteMenuItem.setOnAction(actionEvent2 -> {
+                if (log.isTraceEnabled()) {
+                    log.trace("you click paste menu from contextMenu");
+                }
+
+                log.info("{}",actionEvent2);
+
+                TextArea textArea = getCurrentQueryTextArea();
+                textArea.paste();
+            });
+
+            selectAllMenuItem.setOnAction(actionEvent1 -> {
+                if (log.isTraceEnabled()) {
+                    log.trace("you click select all menu from contextMenu");
+                }
+
+                if (log.isDebugEnabled()) {
+                    log.debug("{}", actionEvent1.getSource());
+                }
+                TextArea textArea=getCurrentQueryTextArea();
+                textArea.selectAll();
+
+            });
+
+            // add menu items to menu
+            contextMenu.getItems().add(selectAllMenuItem);
+            contextMenu.getItems().add(runCurrentSelectedSqlMenuItem);
+            contextMenu.getItems().add(cutMenuItem);
+            contextMenu.getItems().add(copyMenuItem);
+            contextMenu.getItems().add(pasteMenuItem);
+
+            ta.setContextMenu(contextMenu);
+
+            queryTabGridPane.add(ta, 0, 1);
+
+            tab.setContent(queryTabGridPane);
+            centerTabPane.getTabs().add(tab);
+            centerTabPane.getSelectionModel().select(tab);
+            ta.requestFocus();
+            setCurrentQueryTextArea(ta);
         });
 
         centerTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
+
             log.trace("you have change panel ---------------");
             log.debug("current tab is:{}", newTab.getText());
+            log.info("{}",oldTab);
+            log.info("{}",observable);
+
             String newPanelId = newTab.getId();
-            if (newPanelId.indexOf("Query") >= 0 && newTab != null) {
-                //TODO request focus
+
+            if (newPanelId.contains("Query")) {
                 Node tabNode = newTab.getContent();
                 GridPane queryGridPanel = (GridPane) tabNode;
 				TextArea tempTextArea= (TextArea) queryGridPanel.lookup("#ta"+newPanelId.replace("Query",""));
@@ -380,114 +368,100 @@ public class ApplicationMainUI extends Application {
         borderPane.setVisible(true);
 
 
-        systemViewTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem>() {
-            @Override
-            public void changed(ObservableValue<? extends TreeItem> paramObservableValue, TreeItem paramT1, TreeItem selectedItem) {
-                if (log.isTraceEnabled()) {
-                    log.trace("You click the tree Item from system tree view");
-                }
+        systemViewTree.getSelectionModel().selectedItemProperty().addListener((ChangeListener<TreeItem>) (paramObservableValue, paramT1, selectedItem) -> {
+            if (log.isTraceEnabled()) {
+                log.trace("You click the tree Item from system tree view");
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("{}",selectedItem);
+                log.debug("{},{}",paramObservableValue,paramT1);
+            }
+
+            List<Tab> oldTabList = centerTabPane.getTabs();
+            boolean isExistTab = false;
+
+            for (Tab tab : oldTabList) {
                 if (log.isDebugEnabled()) {
-                    log.debug(selectedItem + "");
+                    log.debug("{},{}",tab.getId(),selectedItem.getValue());
                 }
 
-                List<Tab> oldTabList = centerTabPane.getTabs();
-                boolean isExistTab = false;
-
-                for (Tab tab : oldTabList) {
-                    if (log.isDebugEnabled()) {
-                        log.debug(tab.getId() + "|" + selectedItem.getValue());
-                    }
-
-                    if (tab.getId().equals(selectedItem.getValue())) {
-                        isExistTab = true;
-                        centerTabPane.getSelectionModel().select(tab);
-                        break;
-                    }
+                if (tab.getId().equals(selectedItem.getValue())) {
+                    isExistTab = true;
+                    centerTabPane.getSelectionModel().select(tab);
+                    break;
                 }
-                //when you click table sub node
-                if (selectedItem.getParent().getValue().equals(tablesItem.getValue())) {
-                    //when not exist table tab
-                    if (isExistTab == false) {
+            }
+            //when you click table sub node
+            if (selectedItem.getParent().getValue().equals(tablesItem.getValue())) {
+                //when not exist table tab
+                if (!isExistTab) {
 
-                        Tab tab = new Tab(selectedItem.getValue().toString());
-                        GridPane tableGridPane = new GridPane();
+                    Tab tab = new Tab(selectedItem.getValue().toString());
+                    GridPane tableGridPane = new GridPane();
 
-                        VTableName currentTableName = new VTableName(selectedItem.getValue().toString());
+                    VTableName currentTableName = new VTableName(selectedItem.getValue().toString());
 
-                        VPage page = new VPage(new VPageIndex(0), new VPageSize(10));
+                    VPage page = new VPage(new VPageIndex(0), new VPageSize(10));
 
-                        Pagination pagination = new Pagination();
+                    Pagination pagination = new Pagination();
 
-                        TableService tableService = new TableService(getDatabaseService());
-                        int pageCount = tableService.getTablePageCount(currentTableName, page);
-                        pagination.setPageCount(pageCount);
-                        pagination.setPageFactory(new Callback<Integer, Node>() {
-                            @Override
-                            public Node call(Integer pageIndex) {
-                                log.info("PageIndex:" + pageIndex);
+                    TableService tableService = new TableService(getDatabaseService());
+                    int pageCount = tableService.getTablePageCount(currentTableName, page);
+                    pagination.setPageCount(pageCount);
+                    pagination.setPageFactory(pageIndex -> {
 
-                                return createPage(new VPage(new VPageIndex(pageIndex), page.getPageSize()), currentTableName);
-                            }
-                        });
+                        log.info("PageIndex:{}", pageIndex);
 
+                        return createPage(new VPage(new VPageIndex(pageIndex), page.getPageSize()), currentTableName);
+                    });
 
-                        // pagination width change with window
-//						getScene().widthProperty().addListener(new ChangeListener<Number>() {
-//							@Override
-//							public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-//								pagination.setPrefWidth(newValue.doubleValue());
-//							}
-//						});
-
-                        tableGridPane.add(pagination, 0, 1);//column,row
+                    tableGridPane.add(pagination, 0, 1);//column,row
 
 
-                        tab.setContent(tableGridPane);
-                        tab.setClosable(true);
-                        tab.setId(selectedItem.getValue() + "");
+                    tab.setContent(tableGridPane);
+                    tab.setClosable(true);
+                    tab.setId(selectedItem.getValue() + "");
 
-                        log.info("tab id is:{}", selectedItem.getValue());
+                    log.info("tab id is:{}", selectedItem.getValue());
 
-                        centerTabPane.getTabs().add(tab);
+                    centerTabPane.getTabs().add(tab);
 
-                        centerTabPane.getSelectionModel().select(tab);
-                    }
-
+                    centerTabPane.getSelectionModel().select(tab);
                 }
 
             }
+
         });
 
         systemViewTree.setRoot(rootItem);
 
         systemViewTree.setShowRoot(false);
 
-
         leftGridPane.add(systemViewTree, 0, 0);
         borderPane.setLeft(leftGridPane);
 
-        fileOpenMenu.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
-                if (log.isTraceEnabled()) {
-                    log.trace("You click the file open menu from menu Item");
-                }
-                VDatabaseFile databaseFile = applicationService.openDataBaseFile(stage);
-
-                setDatabaseService(new DatabaseService(databaseFile));
-
-                TableService tableService = new TableService(getDatabaseService());
-                VTableList vTableList = tableService.getTables();
-                List<VTable> tableList = vTableList.getTables();
-                for (VTable table : tableList) {
-                    TreeItem<String> tablesItemNode = new TreeItem<>(table.getTableName().getTableName());
-                    tablesItem.getChildren().add(tablesItemNode);
-                }
-
-                tablesItem.setExpanded(true);
-
+        fileOpenMenu.setOnAction(event -> {
+            if (log.isTraceEnabled()) {
+                log.trace("You click the file open menu from menu Item");
             }
+
+            log.info("{}",event);
+
+            VDatabaseFile databaseFile = applicationService.openDataBaseFile(stage);
+
+            setDatabaseService(new DatabaseService(databaseFile));
+
+            TableService tableService = new TableService(getDatabaseService());
+            VTableList vTableList = tableService.getTables();
+            List<VTable> tableList = vTableList.getTables();
+            for (VTable table : tableList) {
+                TreeItem<String> tablesItemNode = new TreeItem<>(table.getTableName().getTableName());
+                tablesItem.getChildren().add(tablesItemNode);
+            }
+
+            tablesItem.setExpanded(true);
+
         });
 
         openBt.setOnAction(fileOpenMenu.getOnAction());
@@ -499,11 +473,9 @@ public class ApplicationMainUI extends Application {
         stage.titleProperty().bind(I18N.createStringBinding("window.title"));
         stage.setScene(scene);
 
-        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent event) {
-                Platform.exit();
-            }
+        stage.setOnCloseRequest(event -> {
+            log.info("{}",event);
+            Platform.exit();
         });
 
         stage.show();
