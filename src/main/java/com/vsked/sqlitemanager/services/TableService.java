@@ -22,6 +22,7 @@ import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -184,5 +185,28 @@ public class TableService {
 
         pageSql=sql+" limit "+page.getPageSize().getSize()+" OFFSET "+page.getCurrentPageIndex().getIndex()*page.getPageSize().getSize();
         return pageSql;
+    }
+
+    public void addColumn(VTableName tableName, String columnName, String dataType, boolean isNotNull) throws SQLException {
+        // 构建 SQL 语句
+        StringBuilder sql = new StringBuilder("ALTER TABLE ")
+                .append(tableName.getTableName()) // 表名
+                .append(" ADD COLUMN ")
+                .append(columnName) // 字段名称
+                .append(" ")
+                .append(dataType); // 数据类型
+
+        // 如果字段需要非空约束，添加 NOT NULL
+        if (isNotNull) {
+            sql.append(" NOT NULL");
+        }
+
+        // 执行 SQL 语句
+        try (Connection connection = databaseService.getvConnection().getConnection();
+             Statement stmt = connection.createStatement()) {
+            stmt.execute(sql.toString());
+        } catch (SQLException e) {
+            throw new SQLException("Failed to add column: " + columnName, e);
+        }
     }
 }

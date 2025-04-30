@@ -235,6 +235,22 @@ optimize log and info code.
 today is so hot,I felt tired.work is very hard,how long time I can go 
 another place
 
+--------------------------------------------------------------------------------
+20250428
+
+sometimes alot of code not written by human
+maybe it's generate by AI.
+whatever you like or not like,
+The software you used has been created by AI.
+I felt dangerous about this software.
+--------------------------------------------------------------------------------
+20250430
+
+update some code about table design and table service
+but this code not test very well
+I need read and fixed it again
+
+
 I will install a virtual machine.
 because there was a lot of virus in internet
 I can try virtualbox or vmware or other sandbox in windows11

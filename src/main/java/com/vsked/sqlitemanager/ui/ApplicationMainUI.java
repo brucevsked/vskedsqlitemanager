@@ -1,5 +1,11 @@
 package com.vsked.sqlitemanager.ui;
 
+import com.vsked.sqlitemanager.domain.VTableColumnId;
+import com.vsked.sqlitemanager.domain.VTableColumnName;
+import com.vsked.sqlitemanager.domain.VTableColumnNotNull;
+import com.vsked.sqlitemanager.domain.VTableColumnPk;
+import com.vsked.sqlitemanager.domain.VTableDfltValue;
+import com.vsked.sqlitemanager.domain.VTableTableColumnDataType;
 import com.vsked.sqlitemanager.services.I18N;
 import com.vsked.sqlitemanager.domain.VPage;
 import com.vsked.sqlitemanager.domain.VDatabaseFile;
@@ -22,7 +28,12 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -32,10 +43,12 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.MapValueFactory;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.BorderPane;
@@ -43,9 +56,13 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 
 
 public class ApplicationMainUI extends Application {
@@ -233,7 +250,22 @@ public class ApplicationMainUI extends Application {
                 if (log.isTraceEnabled()) {
                     log.trace("You click run query button from query {}" ,queryCount);
                 }
-
+                new Thread(() -> {
+                    try {
+                        String sql = getCurrentQueryTextArea().getText();
+                        TableService tableService = new TableService(getDatabaseService());
+                        // 执行查询并更新 UI
+                        Platform.runLater(() -> {
+                            // 更新查询结果
+                        });
+                    } catch (Exception e) {
+                        log.error("Query execution failed", e);
+                        Platform.runLater(() -> {
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "Query failed: " + e.getMessage());
+                            alert.show();
+                        });
+                    }
+                }).start();
                 log.info("{}",actionEvent6);
 
             });
@@ -438,6 +470,28 @@ public class ApplicationMainUI extends Application {
 
         systemViewTree.setShowRoot(false);
 
+        ContextMenu treeContextMenu = new ContextMenu();
+        MenuItem refreshItem = new MenuItem("Refresh");
+        refreshItem.setOnAction(event -> {
+            // 刷新树形结构
+            //TODO refresh tree
+        });
+        treeContextMenu.getItems().add(refreshItem);
+        systemViewTree.setContextMenu(treeContextMenu);
+
+        ContextMenu tableContextMenu = new ContextMenu();
+        MenuItem editTableStructureMenuItem = new MenuItem("编辑表结构");
+        editTableStructureMenuItem.setOnAction(event -> {
+            TreeItem<String> selectedItem = systemViewTree.getSelectionModel().getSelectedItem();
+            if (selectedItem != null && selectedItem.getParent().getValue().equals(tablesItem.getValue())) {
+                VTableName tableName = new VTableName(selectedItem.getValue());
+                showEditTableStructureDialog(tableName);
+            }
+        });
+        tableContextMenu.getItems().add(editTableStructureMenuItem);
+
+        systemViewTree.setContextMenu(tableContextMenu);
+
         leftGridPane.add(systemViewTree, 0, 0);
         borderPane.setLeft(leftGridPane);
 
@@ -480,7 +534,420 @@ public class ApplicationMainUI extends Application {
 
         stage.show();
     }
+    private void showEditTableStructureDialog(VTableName tableName) {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("编辑表结构 - " + tableName.getTableName());
 
+        TableService tableService = new TableService(getDatabaseService());
+        List<VTableColumn> tableColumns = tableService.getColumns(tableName);
+
+        // 创建 TableView 显示字段信息
+        TableView<VTableColumn> tableStructureView = new TableView<>();
+        TableColumn<VTableColumn, String> columnNameCol = new TableColumn<>("字段名称");
+        columnNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        TableColumn<VTableColumn, String> columnTypeCol = new TableColumn<>("数据类型");
+        columnTypeCol.setCellValueFactory(new PropertyValueFactory<>("dataType"));
+
+        TableColumn<VTableColumn, Boolean> notNullCol = new TableColumn<>("非空");
+        notNullCol.setCellValueFactory(new PropertyValueFactory<>("notNull"));
+
+        tableStructureView.getColumns().addAll(columnNameCol, columnTypeCol, notNullCol);
+
+        ObservableList<VTableColumn> observableColumns = FXCollections.observableArrayList(tableColumns);
+        tableStructureView.setItems(observableColumns);
+
+        // 添加按钮
+        Button addButton = new Button("添加字段");
+        addButton.setOnAction(event -> {
+            showAddFieldDialog(tableName, tableStructureView.getItems());
+        });
+
+        Button modifyButton = new Button("修改字段");
+        modifyButton.setOnAction(event -> {
+            VTableColumn selectedColumn = tableStructureView.getSelectionModel().getSelectedItem();
+            if (selectedColumn == null) {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "请先选择一个字段！");
+                alert.show();
+                return;
+            }
+            showModifyFieldDialog(tableName, selectedColumn, tableStructureView.getItems());
+        });
+
+        Button deleteButton = new Button("删除字段");
+        deleteButton.setOnAction(event -> {
+            VTableColumn selectedColumn = tableStructureView.getSelectionModel().getSelectedItem();
+            if (selectedColumn == null) {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "请先选择一个字段！");
+                alert.show();
+                return;
+            }
+            try {
+                deleteField(tableName, selectedColumn.getName().getName(), tableStructureView.getItems());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        Button saveButton = new Button("保存更改");
+        saveButton.setOnAction(event -> {
+            try {
+                saveTableChanges(tableName, tableStructureView.getItems());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            dialog.close();
+        });
+
+        // 布局
+        GridPane gridPane = new GridPane();
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+        gridPane.add(tableStructureView, 0, 0, 4, 1);
+        gridPane.add(addButton, 0, 1);
+        gridPane.add(modifyButton, 1, 1);
+        gridPane.add(deleteButton, 2, 1);
+        gridPane.add(saveButton, 3, 1);
+
+        dialog.getDialogPane().setContent(gridPane);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
+        dialog.show();
+    }
+
+    public void addColumn(VTableName tableName, String columnName, String dataType, boolean isNotNull) throws SQLException {
+        String sql = "ALTER TABLE " + tableName.getTableName() + " ADD COLUMN " + columnName + " " + dataType;
+        if (isNotNull) {
+            sql += " NOT NULL";
+        }
+        try (Statement stmt = databaseService.getvConnection().getConnection().createStatement()) {
+            stmt.execute(sql);
+        }
+    }
+    public void saveTableChanges(VTableName tableName, ObservableList<VTableColumn> updatedColumns) throws SQLException {
+        String tempTableName = tableName.getTableName() + "_temp";
+        Connection connection = null;
+        Statement stmt = null;
+
+        try {
+            // 获取数据库连接
+            connection = databaseService.getvConnection().getConnection();
+            stmt = connection.createStatement();
+
+            // 1. 创建临时表并复制数据（应用所有字段的修改）
+            StringBuilder createTempTableSql = new StringBuilder("CREATE TABLE " + tempTableName + " (");
+            for (VTableColumn column : updatedColumns) {
+                createTempTableSql.append(column.getName().getName()) // 字段名称
+                        .append(" ") // 空格分隔
+                        .append(column.getDataType().getDataType()); // 数据类型
+
+                if (column.getNotNull().isNotNull()) {
+                    createTempTableSql.append(" NOT NULL"); // 非空约束
+                }
+
+                if (column.getPk().getPrimaryKey() == 1) {
+                    createTempTableSql.append(" PRIMARY KEY"); // 主键约束
+                }
+
+                createTempTableSql.append(", ");
+            }
+
+            // 去掉最后一个逗号和空格
+            createTempTableSql.setLength(createTempTableSql.length() - 2);
+            createTempTableSql.append(")");
+
+            stmt.execute(createTempTableSql.toString());
+
+            // 2. 复制数据到临时表
+            StringBuilder copyDataSql = new StringBuilder("INSERT INTO " + tempTableName + " SELECT ");
+            for (VTableColumn column : updatedColumns) {
+                copyDataSql.append(column.getName().getName()).append(", ");
+            }
+
+            // 去掉最后一个逗号和空格
+            copyDataSql.setLength(copyDataSql.length() - 2);
+            copyDataSql.append(" FROM ").append(tableName.getTableName());
+            stmt.execute(copyDataSql.toString());
+
+            // 3. 删除原表
+            String dropTableSql = "DROP TABLE " + tableName.getTableName();
+            stmt.execute(dropTableSql);
+
+            // 4. 重命名临时表为原表名
+            String renameTableSql = "ALTER TABLE " + tempTableName + " RENAME TO " + tableName.getTableName();
+            stmt.execute(renameTableSql);
+        } catch (SQLException e) {
+            throw new SQLException("Failed to save table changes: " + e.getMessage(), e);
+        } finally {
+            // 关闭资源
+            if (stmt != null) {
+                stmt.close();
+            }
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        }
+    }
+    private void showModifyFieldDialog(VTableName tableName, VTableColumn selectedColumn, ObservableList<VTableColumn> tableColumns) {
+        // 创建对话框
+        Dialog<VTableColumn> dialog = new Dialog<>();
+        dialog.setTitle("修改字段 - " + tableName.getTableName());
+        dialog.setHeaderText("请修改字段的信息");
+
+        // 设置按钮
+        ButtonType modifyButtonType = new ButtonType("修改", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(modifyButtonType, ButtonType.CANCEL);
+
+        // 创建输入控件
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField fieldName = new TextField(selectedColumn.getName().getName());
+        fieldName.setPromptText("字段名称");
+
+        TextField fieldType = new TextField(selectedColumn.getDataType().getDataType());
+        fieldType.setPromptText("数据类型");
+
+        CheckBox notNullCheckBox = new CheckBox("非空");
+        notNullCheckBox.setSelected(selectedColumn.getNotNull().isNotNull());
+
+        grid.add(new Label("字段名称:"), 0, 0);
+        grid.add(fieldName, 1, 0);
+        grid.add(new Label("数据类型:"), 0, 1);
+        grid.add(fieldType, 1, 1);
+        grid.add(notNullCheckBox, 1, 2);
+
+        // 设置对话框内容
+        dialog.getDialogPane().setContent(grid);
+
+        // 禁用“修改”按钮直到输入有效
+        Node modifyButton = dialog.getDialogPane().lookupButton(modifyButtonType);
+        modifyButton.setDisable(true);
+
+        // 监听输入有效性
+        fieldName.textProperty().addListener((observable, oldValue, newValue) -> {
+            modifyButton.setDisable(newValue.trim().isEmpty() || fieldType.getText().trim().isEmpty());
+        });
+        fieldType.textProperty().addListener((observable, oldValue, newValue) -> {
+            modifyButton.setDisable(newValue.trim().isEmpty() || fieldName.getText().trim().isEmpty());
+        });
+
+        // 转换结果
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == modifyButtonType) {
+                return new VTableColumn(
+                        selectedColumn.getId(), // 保留原有 ID
+                        new VTableColumnName(fieldName.getText()),
+                        new VTableTableColumnDataType(fieldType.getText()),
+                        new VTableColumnNotNull(notNullCheckBox.isSelected()),
+                        selectedColumn.getDfltValue(), // 保留默认值
+                        selectedColumn.getPk() // 保留主键信息
+                );
+            }
+            return null;
+        });
+
+        // 显示对话框并处理结果
+        dialog.showAndWait().ifPresent(modifiedColumn -> {
+            try {
+                // 修改字段到数据库
+                TableService tableService = new TableService(getDatabaseService());
+                //TODO add mofify column
+//                tableService.modifyColumn(
+//                        tableName,
+//                        selectedColumn.getName().getName(),
+//                        modifiedColumn.getName().getName(),
+//                        modifiedColumn.getDataType().getDataType(),
+//                        modifiedColumn.getNotNull().isNotNull()
+//                );
+
+                // 更新表格视图
+                int index = tableColumns.indexOf(selectedColumn);
+                if (index != -1) {
+                    tableColumns.set(index, modifiedColumn); // 替换旧字段
+                }
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "修改字段失败: " + e.getMessage());
+                alert.show();
+            }
+        });
+    }
+
+    private void showAddFieldDialog(VTableName tableName, ObservableList<VTableColumn> tableColumns) {
+        // 创建对话框
+        Dialog<VTableColumn> dialog = new Dialog<>();
+        dialog.setTitle("添加字段 - " + tableName.getTableName());
+        dialog.setHeaderText("请输入新字段的信息");
+
+        // 设置按钮
+        ButtonType addButtonType = new ButtonType("添加", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+
+        // 创建输入控件
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField fieldName = new TextField();
+        fieldName.setPromptText("字段名称");
+
+        TextField fieldType = new TextField();
+        fieldType.setPromptText("数据类型");
+
+        CheckBox notNullCheckBox = new CheckBox("非空");
+
+        grid.add(new Label("字段名称:"), 0, 0);
+        grid.add(fieldName, 1, 0);
+        grid.add(new Label("数据类型:"), 0, 1);
+        grid.add(fieldType, 1, 1);
+        grid.add(notNullCheckBox, 1, 2);
+
+        // 设置对话框内容
+        dialog.getDialogPane().setContent(grid);
+
+        // 禁用“添加”按钮直到输入有效
+        Node addButton = dialog.getDialogPane().lookupButton(addButtonType);
+        addButton.setDisable(true);
+
+        // 监听输入有效性
+        fieldName.textProperty().addListener((observable, oldValue, newValue) -> {
+            addButton.setDisable(newValue.trim().isEmpty() || fieldType.getText().trim().isEmpty());
+        });
+        fieldType.textProperty().addListener((observable, oldValue, newValue) -> {
+            addButton.setDisable(newValue.trim().isEmpty() || fieldName.getText().trim().isEmpty());
+        });
+
+        // 转换结果
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == addButtonType) {
+                return new VTableColumn(
+                        new VTableColumnId(tableColumns.size()), // 假设新字段的 ID 是当前字段数量
+                        new VTableColumnName(fieldName.getText()),
+                        new VTableTableColumnDataType(fieldType.getText()),
+                        new VTableColumnNotNull(notNullCheckBox.isSelected()),
+                        new VTableDfltValue(null),
+                        new VTableColumnPk(0)
+                );
+            }
+            return null;
+        });
+
+        // 显示对话框并处理结果
+        dialog.showAndWait().ifPresent(newColumn -> {
+            try {
+                // 添加字段到数据库
+                TableService tableService = new TableService(getDatabaseService());
+                tableService.addColumn(tableName, newColumn.getName().getName(), newColumn.getDataType().getDataType(), newColumn.getNotNull().isNotNull());
+
+                // 更新表格视图
+                tableColumns.add(newColumn);
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "添加字段失败: " + e.getMessage());
+                alert.show();
+            }
+        });
+    }
+
+    public void modifyColumn(VTableName tableName, String oldColumnName, String newColumnName, String newDataType, boolean isNotNull) throws SQLException {
+        String tempTableName = tableName.getTableName() + "_temp";
+        String createTempTableSql = "CREATE TABLE " + tempTableName + " AS SELECT * FROM " + tableName.getTableName();
+        executeUpdate(createTempTableSql);
+
+        String dropTableSql = "DROP TABLE " + tableName.getTableName();
+        executeUpdate(dropTableSql);
+
+        String createNewTableSql = "CREATE TABLE " + tableName.getTableName() + "(";
+        // TODO: 根据字段列表动态生成 SQL
+        createNewTableSql += ")";
+        executeUpdate(createNewTableSql);
+
+        String copyDataSql = "INSERT INTO " + tableName.getTableName() + " SELECT ";
+        // TODO: 动态生成插入字段列表
+        copyDataSql += " FROM " + tempTableName;
+        executeUpdate(copyDataSql);
+
+        String dropTempTableSql = "DROP TABLE " + tempTableName;
+        executeUpdate(dropTempTableSql);
+    }
+
+    private void executeUpdate(String sql) throws SQLException {
+        try (Statement stmt = databaseService.getvConnection().getConnection().createStatement()) {
+            stmt.executeUpdate(sql);
+        }
+    }
+
+    public void deleteField(VTableName tableName, String columnName, ObservableList<VTableColumn> tableColumns) throws SQLException {
+        String tempTableName = tableName.getTableName() + "_temp";
+        Connection connection = null;
+        Statement stmt = null;
+
+        try {
+            // 获取数据库连接
+            connection = databaseService.getvConnection().getConnection();
+            stmt = connection.createStatement();
+
+            // 1. 创建临时表并复制数据（排除要删除的字段）
+            StringBuilder createTempTableSql = new StringBuilder("CREATE TABLE " + tempTableName + " AS SELECT ");
+            TableService tableService = new TableService(getDatabaseService());
+            List<VTableColumn> columns = tableService.getColumns(tableName);
+
+            for (VTableColumn column : columns) {
+                if (!column.getName().getName().equals(columnName)) {
+                    createTempTableSql.append(column.getName().getName()).append(", ");
+                }
+            }
+
+            // 去掉最后一个逗号和空格
+            createTempTableSql.setLength(createTempTableSql.length() - 2);
+            createTempTableSql.append(" FROM ").append(tableName.getTableName());
+            stmt.execute(createTempTableSql.toString());
+
+            // 2. 删除原表
+            String dropTableSql = "DROP TABLE " + tableName.getTableName();
+            stmt.execute(dropTableSql);
+
+            // 3. 重命名临时表为原表名
+            String renameTableSql = "ALTER TABLE " + tempTableName + " RENAME TO " + tableName.getTableName();
+            stmt.execute(renameTableSql);
+
+            // 4. 更新表格视图
+            Platform.runLater(() -> {
+                tableColumns.removeIf(column -> column.getName().getName().equals(columnName));
+            });
+        } catch (SQLException e) {
+            throw new SQLException("Failed to delete field: " + columnName, e);
+        } finally {
+            // 关闭资源
+            if (stmt != null) {
+                stmt.close();
+            }
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        }
+    }
+
+    public void deleteColumn(VTableName tableName, String columnName) throws SQLException {
+        String tempTableName = tableName.getTableName() + "_temp";
+        String createTempTableSql = "CREATE TABLE " + tempTableName + " AS SELECT * FROM " + tableName.getTableName();
+        executeUpdate(createTempTableSql);
+
+        String dropTableSql = "DROP TABLE " + tableName.getTableName();
+        executeUpdate(dropTableSql);
+
+        String createNewTableSql = "CREATE TABLE " + tableName.getTableName() + "(";
+        // TODO: 根据字段列表动态生成 SQL，排除指定字段
+        createNewTableSql += ")";
+        executeUpdate(createNewTableSql);
+
+        String copyDataSql = "INSERT INTO " + tableName.getTableName() + " SELECT ";
+        // TODO: 动态生成插入字段列表
+        copyDataSql += " FROM " + tempTableName;
+        executeUpdate(copyDataSql);
+
+        String dropTempTableSql = "DROP TABLE " + tempTableName;
+        executeUpdate(dropTempTableSql);
+    }
 
     private TableView<Map> createPage(VPage page, VTableName currentTableName) {
 
