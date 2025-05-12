@@ -41,4 +41,12 @@ public class VTableColumn {
     public VTableColumnPk getPk() {
         return pk;
     }
+
+    public void setDataType(VTableTableColumnDataType dataType) {
+        this.dataType = dataType;
+    }
+
+    public void setNotNull(VTableColumnNotNull notNull) {
+        this.notNull = notNull;
+    }
 }

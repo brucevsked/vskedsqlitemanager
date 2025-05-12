@@ -1,5 +1,6 @@
 package com.vsked.sqlitemanager.ui;
 
+import com.vsked.sqlitemanager.domain.SqliteDataType;
 import com.vsked.sqlitemanager.domain.VTableColumnId;
 import com.vsked.sqlitemanager.domain.VTableColumnName;
 import com.vsked.sqlitemanager.domain.VTableColumnNotNull;
@@ -47,6 +48,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.Clipboard;
@@ -544,18 +547,34 @@ public class ApplicationMainUI extends Application {
         // 创建 TableView 显示字段信息
         TableView<VTableColumn> tableStructureView = new TableView<>();
         TableColumn<VTableColumn, String> columnNameCol = new TableColumn<>("字段名称");
-        columnNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        columnNameCol.setCellValueFactory(param -> param.getValue().getName().getNameProperty());
 
         TableColumn<VTableColumn, String> columnTypeCol = new TableColumn<>("数据类型");
-        columnTypeCol.setCellValueFactory(new PropertyValueFactory<>("dataType"));
+        columnTypeCol.setCellValueFactory(param -> param.getValue().getDataType().getDataTypeProperty());
+        columnTypeCol.setCellFactory(ComboBoxTableCell.forTableColumn(FXCollections.observableArrayList(SqliteDataType.TYPES)));
+
+        columnTypeCol.setOnEditCommit(event -> {
+            VTableColumn row = event.getRowValue();
+            row.getDataType().setDataType(event.getNewValue());
+        });
 
         TableColumn<VTableColumn, Boolean> notNullCol = new TableColumn<>("非空");
-        notNullCol.setCellValueFactory(new PropertyValueFactory<>("notNull"));
+        notNullCol.setCellValueFactory(param -> param.getValue().getNotNull().isNotNullProperty());
+        notNullCol.setCellFactory(CheckBoxTableCell.forTableColumn(notNullCol));
+        notNullCol.setEditable(true);
+
+        notNullCol.setOnEditCommit(event -> {
+            VTableColumn row = event.getRowValue();
+            row.getNotNull().setNotNull(event.getNewValue());
+        });
 
         tableStructureView.getColumns().addAll(columnNameCol, columnTypeCol, notNullCol);
 
         ObservableList<VTableColumn> observableColumns = FXCollections.observableArrayList(tableColumns);
         tableStructureView.setItems(observableColumns);
+
+        //启用表格编辑功能
+        tableStructureView.setEditable(true);
 
         // 添加按钮
         Button addButton = new Button("添加字段");
