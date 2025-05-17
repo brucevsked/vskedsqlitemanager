@@ -209,4 +209,29 @@ public class TableService {
             throw new SQLException("Failed to add column: " + columnName, e);
         }
     }
+
+
+    // TableService 类中的 executeQuery 方法
+    public List<Map<String, String>> executeQuery(String sql) throws SQLException {
+        List<Map<String, String>> resultList = new ArrayList<>();
+        Connection conn = databaseService.getvConnection().getConnection();
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnCount = metaData.getColumnCount();
+
+        while (rs.next()) {
+            Map<String, String> row = new HashMap<>();
+            for (int i = 1; i <= columnCount; i++) {
+                String columnName = metaData.getColumnName(i);
+                String value = rs.getString(i);
+                row.put(columnName, value);
+            }
+            resultList.add(row);
+        }
+
+        rs.close();
+        stmt.close();
+        return resultList;
+    }
 }

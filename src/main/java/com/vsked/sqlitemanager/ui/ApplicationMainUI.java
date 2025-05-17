@@ -25,6 +25,7 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -75,7 +76,7 @@ public class ApplicationMainUI extends Application {
     private Scene scene;
     private int globalQueryTabCount = 0;
     private TextArea currentQueryTextArea;
-
+    private GridPane currentQueryGridPane;
 
     private ApplicationService applicationService = new ApplicationService();
     private DatabaseService databaseService;
@@ -97,8 +98,16 @@ public class ApplicationMainUI extends Application {
         return currentQueryTextArea;
     }
 
+    public GridPane getCurrentQueryGridPane() {
+        return currentQueryGridPane;
+    }
+
     public void setCurrentQueryTextArea(TextArea currentQueryTextArea) {
         this.currentQueryTextArea = currentQueryTextArea;
+    }
+
+    public void setCurrentQueryGridPane(GridPane currentQueryGridPane){
+        this.currentQueryGridPane=currentQueryGridPane;
     }
 
     public Scene getScene() {
@@ -248,19 +257,24 @@ public class ApplicationMainUI extends Application {
             queryTabGridPane.add(runQueryButton, 0, 0);
             queryTabGridPane.add(stopQueryButton, 1, 0);
 
+            setCurrentQueryGridPane(queryTabGridPane);
+
 
             runQueryButton.setOnAction(actionEvent6 -> {
                 if (log.isTraceEnabled()) {
                     log.trace("You click run query button from query {}" ,queryCount);
                 }
-                new Thread(() -> {
                     try {
+                        TableView<Map<String, String>> resultTable= new TableView<>();; // 显示结果的表格
                         String sql = getCurrentQueryTextArea().getText();
                         TableService tableService = new TableService(getDatabaseService());
-                        // 执行查询并更新 UI
-                        Platform.runLater(() -> {
-                            // 更新查询结果
-                        });
+                        // 更新查询结果
+                        List<Map<String, String>> results = tableService.executeQuery(sql);
+                        ObservableList<Map<String, String>> data = FXCollections.observableArrayList(results);
+                        resultTable.setItems(data);
+                        GridPane queryGridPanelTmp=getCurrentQueryGridPane();
+                        //TODO 获取面板
+                        queryGridPanelTmp.add(resultTable,2,0);
                     } catch (Exception e) {
                         log.error("Query execution failed", e);
                         Platform.runLater(() -> {
@@ -268,7 +282,6 @@ public class ApplicationMainUI extends Application {
                             alert.show();
                         });
                     }
-                }).start();
                 log.info("{}",actionEvent6);
 
             });
@@ -383,6 +396,7 @@ public class ApplicationMainUI extends Application {
                 GridPane queryGridPanel = (GridPane) tabNode;
 				TextArea tempTextArea= (TextArea) queryGridPanel.lookup("#ta"+newPanelId.replace("Query",""));
 				setCurrentQueryTextArea(tempTextArea);
+                setCurrentQueryGridPane(queryGridPanel);
 				tempTextArea.requestFocus();
 				log.debug("{}",tempTextArea.getText());
             }else{
