@@ -250,6 +250,14 @@ update some code about table design and table service
 but this code not test very well
 I need read and fixed it again
 
+--------------------------------------------------------------------------------
+20250517
+
+recent work is very busy.
+I have a little time to update my sqllite manager project.
+have you use AI help you write some code or solve some hard question?
+maybe we can use ai replace search engine in the future
+
 
 I will install a virtual machine.
 because there was a lot of virus in internet
