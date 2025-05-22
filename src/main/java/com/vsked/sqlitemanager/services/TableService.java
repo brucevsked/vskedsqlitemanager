@@ -234,4 +234,12 @@ public class TableService {
         stmt.close();
         return resultList;
     }
+
+    public int executeUpdate(String sql) throws SQLException {
+        Connection conn = databaseService.getvConnection().getConnection();
+        Statement stmt = conn.createStatement();
+        int rowsAffected = stmt.executeUpdate(sql);
+        stmt.close();
+        return rowsAffected;
+    }
 }

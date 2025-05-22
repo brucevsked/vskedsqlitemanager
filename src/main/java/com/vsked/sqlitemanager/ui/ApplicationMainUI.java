@@ -22,10 +22,10 @@ import com.vsked.sqlitemanager.services.DatabaseService;
 import com.vsked.sqlitemanager.services.TableService;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -52,7 +52,6 @@ import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.MapValueFactory;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.BorderPane;
@@ -66,7 +65,6 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 
 
 public class ApplicationMainUI extends Application {
@@ -259,31 +257,60 @@ public class ApplicationMainUI extends Application {
 
             setCurrentQueryGridPane(queryTabGridPane);
 
-
             runQueryButton.setOnAction(actionEvent6 -> {
                 if (log.isTraceEnabled()) {
-                    log.trace("You click run query button from query {}" ,queryCount);
+                    log.trace("You click run query button from query {}", queryCount);
                 }
-                    try {
-                        TableView<Map<String, String>> resultTable= new TableView<>();; // 显示结果的表格
-                        String sql = getCurrentQueryTextArea().getText();
-                        TableService tableService = new TableService(getDatabaseService());
-                        // 更新查询结果
+                try {
+                    TableView<Map<String, String>> resultTable = new TableView<>(); // 查询结果显示表格
+                    Label resultLabel = new Label(); // 更新等操作后的提示文本
+                    String sql = getCurrentQueryTextArea().getText().trim();
+                    TableService tableService = new TableService(getDatabaseService());
+
+                    GridPane queryGridPanelTmp = getCurrentQueryGridPane();
+
+                    // 清除旧内容（包括表格和标签）
+                    queryGridPanelTmp.getChildren().removeIf(node -> node instanceof TableView || node instanceof Label);
+
+                    if (sql.toLowerCase().startsWith("select")) {
+                        // 执行查询
                         List<Map<String, String>> results = tableService.executeQuery(sql);
                         ObservableList<Map<String, String>> data = FXCollections.observableArrayList(results);
-                        resultTable.setItems(data);
-                        GridPane queryGridPanelTmp=getCurrentQueryGridPane();
-                        //TODO 获取面板
-                        queryGridPanelTmp.add(resultTable,2,0);
-                    } catch (Exception e) {
-                        log.error("Query execution failed", e);
-                        Platform.runLater(() -> {
-                            Alert alert = new Alert(Alert.AlertType.ERROR, "Query failed: " + e.getMessage());
-                            alert.show();
-                        });
-                    }
-                log.info("{}",actionEvent6);
 
+                        // 动态生成列
+                        if (!results.isEmpty()) {
+                            for (String key : results.get(0).keySet()) {
+                                TableColumn<Map<String, String>, String> column = new TableColumn<>(key);
+                                final String currentKey = key;
+                                column.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().get(currentKey)));
+                                resultTable.getColumns().add(column);
+                            }
+                        }
+
+                        resultTable.setItems(data);
+                        queryGridPanelTmp.add(resultTable, 0, 2, 3, 1); // 显示表格
+                    } else {
+                        // 执行更新类语句（UPDATE / INSERT / DELETE）
+                        int rowsAffected = tableService.executeUpdate(sql);
+                        resultLabel.setText(I18N.get("queryPanel.textarea.tips.updateSuccess") + rowsAffected);
+                        resultLabel.setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
+                        queryGridPanelTmp.add(resultLabel, 0, 2); // 显示更新成功信息
+                    }
+
+                } catch (SQLException e) {
+                    log.error("Query execution failed", e);
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "SQL错误: " + e.getMessage());
+                        alert.show();
+                    });
+                } catch (Exception e) {
+                    log.error("Unexpected error", e);
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "发生未知错误: " + e.getMessage());
+                        alert.show();
+                    });
+                }
+                log.info("{}", actionEvent6);
             });
 
             stopQueryButton.setOnAction(actionEvent5 -> {
@@ -383,23 +410,26 @@ public class ApplicationMainUI extends Application {
         });
 
         centerTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
-
             log.trace("you have change panel ---------------");
+
+            if (newTab == null) {
+                log.warn("Selected tab is null. Possibly a tab was closed.");
+                return;
+            }
+
             log.debug("current tab is:{}", newTab.getText());
-            log.info("{}",oldTab);
-            log.info("{}",observable);
 
             String newPanelId = newTab.getId();
 
-            if (newPanelId.contains("Query")) {
+            if (newPanelId != null && newPanelId.contains("Query")) {
                 Node tabNode = newTab.getContent();
                 GridPane queryGridPanel = (GridPane) tabNode;
-				TextArea tempTextArea= (TextArea) queryGridPanel.lookup("#ta"+newPanelId.replace("Query",""));
-				setCurrentQueryTextArea(tempTextArea);
+                TextArea tempTextArea = (TextArea) queryGridPanel.lookup("#ta" + newPanelId.replace("Query", ""));
+                setCurrentQueryTextArea(tempTextArea);
                 setCurrentQueryGridPane(queryGridPanel);
-				tempTextArea.requestFocus();
-				log.debug("{}",tempTextArea.getText());
-            }else{
+                tempTextArea.requestFocus();
+                log.debug("{}", tempTextArea.getText());
+            } else {
                 List<TreeItem<String>> tableItems = tablesItem.getChildren();
                 for (TreeItem<String> item : tableItems) {
                     if (item.getValue().equals(newTab.getText())) {
@@ -497,7 +527,7 @@ public class ApplicationMainUI extends Application {
         systemViewTree.setContextMenu(treeContextMenu);
 
         ContextMenu tableContextMenu = new ContextMenu();
-        MenuItem editTableStructureMenuItem = new MenuItem("编辑表结构");
+        MenuItem editTableStructureMenuItem = I18N.menuItemForKey("tree.contextMenu.editTable");
         editTableStructureMenuItem.setOnAction(event -> {
             TreeItem<String> selectedItem = systemViewTree.getSelectionModel().getSelectedItem();
             if (selectedItem != null && selectedItem.getParent().getValue().equals(tablesItem.getValue())) {
