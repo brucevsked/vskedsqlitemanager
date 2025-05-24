@@ -7,37 +7,42 @@ import java.sql.SQLException;
 public class VConnection {
 
     private final Connection connection;
-    private VDatabaseFile currentDatabaseFile;
+    private final VDatabaseFile currentDatabaseFile;
 
-
-    public VConnection(VDatabaseFile databaseFile) {
-        if(databaseFile==null){
-            throw new IllegalArgumentException("connection database file is null code1");
+    public VConnection(VDatabaseFile databaseFile) throws IllegalArgumentException {
+        if (databaseFile == null) {
+            throw new IllegalArgumentException("Database file cannot be null.");
         }
 
-        if(databaseFile.getDatabaseFile()==null){
-            throw new IllegalArgumentException("connection database file is null code2");
+        if (databaseFile.getDatabaseFile() == null) {
+            throw new IllegalArgumentException("Underlying File object in databaseFile is null.");
         }
 
-        String databaseFilePath=databaseFile.getDatabaseFile().getAbsolutePath();
+        String databaseFilePath = databaseFile.getDatabaseFile().getAbsolutePath();
 
-        String lowCaseFileName=databaseFilePath.toLowerCase();
-
-        if(!lowCaseFileName.endsWith(".db")){
-            throw new IllegalArgumentException("connection database file name is not end with db");
-        }
-
-        if(databaseFilePath.length()<=3){
-            throw new IllegalArgumentException("connection database file name can't empty");
+        if (!isValidDatabasePath(databaseFilePath)) {
+            throw new IllegalArgumentException("Invalid database file path: must end with .db and not be empty.");
         }
 
         try {
             Class.forName("org.sqlite.JDBC");
-            this.connection = DriverManager.getConnection("jdbc:sqlite:"+databaseFilePath);
+            this.connection = DriverManager.getConnection("jdbc:sqlite:" + databaseFilePath);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException("Failed to establish database connection: " + e.getMessage(), e);
         }
-        this.currentDatabaseFile=databaseFile;
+
+        this.currentDatabaseFile = databaseFile;
+    }
+
+    /**
+     * Validates the database file path.
+     */
+    private boolean isValidDatabasePath(String path) {
+        if (path == null || path.trim().isEmpty()) {
+            return false;
+        }
+        String lowCasePath = path.toLowerCase();
+        return lowCasePath.endsWith(".db");
     }
 
     public VDatabaseFile getCurrentDatabaseFile() {
@@ -45,9 +50,16 @@ public class VConnection {
     }
 
     public Connection getConnection() throws SQLException {
-        if(connection==null || connection.isClosed()==true){
-            return new VConnection(this.getCurrentDatabaseFile()).getConnection();
+        if (connection == null || connection.isClosed()) {
+            // Reconnect using the same database file
+            return new VConnection(this.currentDatabaseFile).getConnection();
         }
         return connection;
+    }
+
+    public void close() throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+        }
     }
 }

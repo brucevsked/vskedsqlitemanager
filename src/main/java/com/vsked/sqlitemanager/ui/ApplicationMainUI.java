@@ -59,6 +59,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -83,6 +84,8 @@ public class ApplicationMainUI extends Application {
         return databaseService;
     }
 
+    private TreeView<String> systemViewTree; // 类成员变量
+
     public void setDatabaseService(DatabaseService databaseService) {
         this.databaseService = databaseService;
     }
@@ -104,8 +107,8 @@ public class ApplicationMainUI extends Application {
         this.currentQueryTextArea = currentQueryTextArea;
     }
 
-    public void setCurrentQueryGridPane(GridPane currentQueryGridPane){
-        this.currentQueryGridPane=currentQueryGridPane;
+    public void setCurrentQueryGridPane(GridPane currentQueryGridPane) {
+        this.currentQueryGridPane = currentQueryGridPane;
     }
 
     public Scene getScene() {
@@ -126,7 +129,7 @@ public class ApplicationMainUI extends Application {
 
 
     @Override
-    public void start(Stage stage){
+    public void start(Stage stage) {
 
         // create content
         BorderPane borderPane = new BorderPane();
@@ -143,7 +146,7 @@ public class ApplicationMainUI extends Application {
             if (log.isTraceEnabled()) {
                 log.trace("You click the file exit menu from menu Item");
             }
-            log.info("{}",event.toString());
+            log.info("{}", event.toString());
             applicationService.exit();
         });
 
@@ -156,7 +159,7 @@ public class ApplicationMainUI extends Application {
                 log.trace("You click the english menu from menu Item");
             }
             switchLanguage(Locale.ENGLISH);
-            log.info("{}",event);
+            log.info("{}", event);
         });
 
         chineseMenu.setOnAction(event -> {
@@ -164,7 +167,7 @@ public class ApplicationMainUI extends Application {
                 log.trace("You click the chinese menu from menu Item");
             }
             switchLanguage(Locale.CHINESE);
-            log.info("{}",event);
+            log.info("{}", event);
         });
 
         fileMenu.getItems().add(fileOpenMenu);
@@ -204,7 +207,7 @@ public class ApplicationMainUI extends Application {
         borderPane.setTop(topGridPane);
 
         GridPane leftGridPane = new GridPane();
-        TreeView<String> systemViewTree = new TreeView<>();
+
         TreeItem<String> rootItem = I18N.treeItemForKey("tree.system");
 
         TreeItem<String> tablesItem = I18N.treeItemForKey("tree.tables");
@@ -236,7 +239,7 @@ public class ApplicationMainUI extends Application {
                 log.trace("You click the new query button from toolbar");
             }
 
-            log.info("{}",actionEvent);
+            log.info("{}", actionEvent);
 
             if (getDatabaseService() == null) {
                 Alert alert = I18N.alertForKey(Alert.AlertType.INFORMATION, "alert.notExitOpenDatabaseFile.title", "alert.notExitOpenDatabaseFile.headerText", "alert.notExitOpenDatabaseFile.contentText");
@@ -318,12 +321,12 @@ public class ApplicationMainUI extends Application {
                     log.trace("You click stop query button from query grid");
                 }
 
-                log.info("{}",actionEvent5);
+                log.info("{}", actionEvent5);
 
             });
 
             TextArea ta = new TextArea();
-            ta.setId("ta"+queryCount);
+            ta.setId("ta" + queryCount);
             ta.setFocusTraversable(true); //set can get focus
             // create a menu
             ContextMenu contextMenu = new ContextMenu();
@@ -341,7 +344,7 @@ public class ApplicationMainUI extends Application {
                     log.trace("you click cut menu from contextMenu");
                 }
 
-                log.info("{}",actionEvent4);
+                log.info("{}", actionEvent4);
 
                 TextArea textArea = getCurrentQueryTextArea();
                 textArea.cut();
@@ -352,7 +355,7 @@ public class ApplicationMainUI extends Application {
                     log.trace("you click copy menu from contextMenu");
                 }
 
-                log.info("{}",actionEvent3);
+                log.info("{}", actionEvent3);
 
                 TextArea textArea = getCurrentQueryTextArea();
 
@@ -372,7 +375,7 @@ public class ApplicationMainUI extends Application {
                     log.trace("you click paste menu from contextMenu");
                 }
 
-                log.info("{}",actionEvent2);
+                log.info("{}", actionEvent2);
 
                 TextArea textArea = getCurrentQueryTextArea();
                 textArea.paste();
@@ -386,7 +389,7 @@ public class ApplicationMainUI extends Application {
                 if (log.isDebugEnabled()) {
                     log.debug("{}", actionEvent1.getSource());
                 }
-                TextArea textArea=getCurrentQueryTextArea();
+                TextArea textArea = getCurrentQueryTextArea();
                 textArea.selectAll();
 
             });
@@ -408,6 +411,8 @@ public class ApplicationMainUI extends Application {
             ta.requestFocus();
             setCurrentQueryTextArea(ta);
         });
+
+        systemViewTree = new TreeView<>(); // 初始化
 
         centerTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
             log.trace("you have change panel ---------------");
@@ -453,8 +458,8 @@ public class ApplicationMainUI extends Application {
             }
 
             if (log.isDebugEnabled()) {
-                log.debug("{}",selectedItem);
-                log.debug("{},{}",paramObservableValue,paramT1);
+                log.debug("{}", selectedItem);
+                log.debug("{},{}", paramObservableValue, paramT1);
             }
 
             List<Tab> oldTabList = centerTabPane.getTabs();
@@ -462,7 +467,7 @@ public class ApplicationMainUI extends Application {
 
             for (Tab tab : oldTabList) {
                 if (log.isDebugEnabled()) {
-                    log.debug("{},{}",tab.getId(),selectedItem.getValue());
+                    log.debug("{},{}", tab.getId(), selectedItem.getValue());
                 }
 
                 if (tab.getId().equals(selectedItem.getValue())) {
@@ -527,6 +532,22 @@ public class ApplicationMainUI extends Application {
         systemViewTree.setContextMenu(treeContextMenu);
 
         ContextMenu tableContextMenu = new ContextMenu();
+        MenuItem addTableMenuItem = I18N.menuItemForKey("tree.contextMenu.addTable"); // 国际化支持
+        addTableMenuItem.setOnAction(event -> {
+            showAddTableDialog(); // 点击时弹出添加表的对话框
+        });
+        tableContextMenu.getItems().add(addTableMenuItem); // 添加到上下文菜单中
+MenuItem renameTableMenuItem = I18N.menuItemForKey("tree.contextMenu.renameTable");
+renameTableMenuItem.setOnAction(event -> {
+    TreeItem<String> selectedItem = systemViewTree.getSelectionModel().getSelectedItem();
+    if (selectedItem != null && selectedItem.getParent().getValue().equals(tablesItem.getValue())) {
+        VTableName oldTableName = new VTableName(selectedItem.getValue());
+        showRenameTableDialog(oldTableName, selectedItem);
+    }
+});
+tableContextMenu.getItems().add(renameTableMenuItem); // 添加到上下文菜单中
+
+
         MenuItem editTableStructureMenuItem = I18N.menuItemForKey("tree.contextMenu.editTable");
         editTableStructureMenuItem.setOnAction(event -> {
             TreeItem<String> selectedItem = systemViewTree.getSelectionModel().getSelectedItem();
@@ -547,7 +568,7 @@ public class ApplicationMainUI extends Application {
                 log.trace("You click the file open menu from menu Item");
             }
 
-            log.info("{}",event);
+            log.info("{}", event);
 
             VDatabaseFile databaseFile = applicationService.openDataBaseFile(stage);
 
@@ -575,12 +596,61 @@ public class ApplicationMainUI extends Application {
         stage.setScene(scene);
 
         stage.setOnCloseRequest(event -> {
-            log.info("{}",event);
+            log.info("{}", event);
             Platform.exit();
         });
 
         stage.show();
     }
+private void showRenameTableDialog(VTableName oldTableName, TreeItem<String> tableItem) {
+    Dialog<String> dialog = new Dialog<>();
+    dialog.setTitle("重命名表");
+    dialog.setHeaderText("请输入新的表名");
+
+    ButtonType renameButtonType = new ButtonType("重命名", ButtonBar.ButtonData.OK_DONE);
+    dialog.getDialogPane().getButtonTypes().addAll(renameButtonType, ButtonType.CANCEL);
+
+    TextField tableNameField = new TextField(oldTableName.getTableName());
+    tableNameField.setPromptText("新表名");
+
+    GridPane grid = new GridPane();
+    grid.setHgap(10);
+    grid.setVgap(10);
+    grid.add(new Label("新表名:"), 0, 0);
+    grid.add(tableNameField, 1, 0);
+
+    dialog.getDialogPane().setContent(grid);
+
+    Node renameButton = dialog.getDialogPane().lookupButton(renameButtonType);
+    renameButton.setDisable(true); // 初始禁用按钮
+
+    // 输入非空验证
+    tableNameField.textProperty().addListener((observable, oldValue, newValue) -> {
+        renameButton.setDisable(newValue.trim().isEmpty() || newValue.equals(oldTableName.getTableName()));
+    });
+
+    dialog.setResultConverter(dialogButton -> {
+        if (dialogButton == renameButtonType) {
+            return tableNameField.getText();
+        }
+        return null;
+    });
+
+    dialog.showAndWait().ifPresent(newTableName -> {
+        try {
+            TableService tableService = new TableService(getDatabaseService());
+            tableService.renameTable(oldTableName, new VTableName(newTableName)); // 调用服务层重命名表
+
+            // 更新左侧树视图
+            tableItem.setValue(newTableName);
+
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "重命名失败: " + e.getMessage());
+            alert.show();
+        }
+    });
+}
+
     private void showEditTableStructureDialog(VTableName tableName) {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("编辑表结构 - " + tableName.getTableName());
@@ -677,6 +747,57 @@ public class ApplicationMainUI extends Application {
         dialog.show();
     }
 
+    private void showAddTableDialog() {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("添加新表");
+        dialog.setHeaderText("请输入新表的名称");
+
+        ButtonType addButtonType = new ButtonType("添加", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+
+        TextField tableNameField = new TextField();
+        tableNameField.setPromptText("表名");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.add(new Label("表名称:"), 0, 0);
+        grid.add(tableNameField, 1, 0);
+
+        dialog.getDialogPane().setContent(grid);
+
+        Node addButton = dialog.getDialogPane().lookupButton(addButtonType);
+        addButton.setDisable(true); // 初始禁用按钮
+
+        // 输入非空验证
+        tableNameField.textProperty().addListener((observable, oldValue, newValue) -> {
+            addButton.setDisable(newValue.trim().isEmpty());
+        });
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == addButtonType) {
+                return tableNameField.getText();
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(tableName -> {
+            try {
+                TableService tableService = new TableService(getDatabaseService());
+                tableService.createTable(new VTableName(tableName)); // 创建数据库中的新表
+
+                // 更新左侧树视图
+                TreeItem<String> tablesNode = (TreeItem<String>) systemViewTree.getRoot().getChildren().get(0); // 获取 "Tables"
+                tablesNode.getChildren().add(new TreeItem<>(tableName));
+                tablesNode.setExpanded(true);
+
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "创建表失败: " + e.getMessage());
+                alert.show();
+            }
+        });
+    }
+
     public void addColumn(VTableName tableName, String columnName, String dataType, boolean isNotNull) throws SQLException {
         String sql = "ALTER TABLE " + tableName.getTableName() + " ADD COLUMN " + columnName + " " + dataType;
         if (isNotNull) {
@@ -686,6 +807,7 @@ public class ApplicationMainUI extends Application {
             stmt.execute(sql);
         }
     }
+
     public void saveTableChanges(VTableName tableName, ObservableList<VTableColumn> updatedColumns) throws SQLException {
         String tempTableName = tableName.getTableName() + "_temp";
         Connection connection = null;
@@ -750,6 +872,7 @@ public class ApplicationMainUI extends Application {
             }
         }
     }
+
     private void showModifyFieldDialog(VTableName tableName, VTableColumn selectedColumn, ObservableList<VTableColumn> tableColumns) {
         // 创建对话框
         Dialog<VTableColumn> dialog = new Dialog<>();

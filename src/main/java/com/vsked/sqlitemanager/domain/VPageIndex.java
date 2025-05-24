@@ -1,26 +1,46 @@
 package com.vsked.sqlitemanager.domain;
 
+import java.util.Objects;
+
 /**
- * pageIndex,also current page number
+ * 表示分页中的当前页码（从 0 开始）。
  */
 public class VPageIndex {
-    /**
-     * start index at current page
-     */
-    private Integer index;
+
+    private final int pageIndex;
 
     public VPageIndex(Integer index) {
-        if(index==null){
-            index= 0;
+        if (index == null || index < 0) {
+            this.pageIndex = 0;
+        } else {
+            this.pageIndex = index;
         }
-        if(index <=0){
-            index= 0;
-        }
-        this.index = index;
     }
 
-    public Integer getIndex() {
-        return index;
+    /**
+     * 获取当前页码（从 0 开始）
+     */
+    public int getPageIndex() {
+        return pageIndex;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof VPageIndex)) return false;
+        VPageIndex that = (VPageIndex) o;
+        return pageIndex == that.pageIndex;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pageIndex);
+    }
+
+    @Override
+    public String toString() {
+        return "VPageIndex{" +
+                "pageIndex=" + pageIndex +
+                '}';
+    }
 }

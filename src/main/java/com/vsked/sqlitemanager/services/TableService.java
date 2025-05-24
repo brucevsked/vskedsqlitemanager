@@ -16,7 +16,6 @@ import com.vsked.sqlitemanager.domain.VTable;
 import com.vsked.sqlitemanager.domain.VTableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Connection;
@@ -44,20 +43,20 @@ public class TableService {
         return databaseService;
     }
 
-    public VTableList getTables(){
-        List<VTable> tableList=new LinkedList<>();
+    public VTableList getTables() {
+        List<VTable> tableList = new LinkedList<>();
 
         try {
-            Connection conn= getDatabaseService().getvConnection().getConnection();
-            Statement st=conn.createStatement();
-            String sql="SELECT name FROM sqlite_master WHERE type='table'";
-            ResultSet rs=st.executeQuery(sql);
+            Connection conn = getDatabaseService().getvConnection().getConnection();
+            Statement st = conn.createStatement();
+            String sql = "SELECT name FROM sqlite_master WHERE type='table'";
+            ResultSet rs = st.executeQuery(sql);
 
-            String tableName="";
+            String tableName = "";
 
-            while (rs.next()){
-                tableName=rs.getString("name");
-                if(log.isInfoEnabled()){
+            while (rs.next()) {
+                tableName = rs.getString("name");
+                if (log.isInfoEnabled()) {
                     log.info(tableName);
                 }
                 tableList.add(new VTable(new VTableName(tableName)));
@@ -72,27 +71,27 @@ public class TableService {
         return new VTableList(tableList);
     }
 
-    public List<VTableColumn> getColumns(VTableName tableName){
-        List<VTableColumn> tableColumns=new LinkedList<>();
+    public List<VTableColumn> getColumns(VTableName tableName) {
+        List<VTableColumn> tableColumns = new LinkedList<>();
         try {
 
-            Connection conn= getDatabaseService().getvConnection().getConnection();
-            Statement st=conn.createStatement();
-            String sql="select * from pragma_table_info('"+tableName.getTableName()+"')";
-            ResultSet rs=st.executeQuery(sql);
+            Connection conn = getDatabaseService().getvConnection().getConnection();
+            Statement st = conn.createStatement();
+            String sql = "select * from pragma_table_info('" + tableName.getTableName() + "')";
+            ResultSet rs = st.executeQuery(sql);
 
-            while (rs.next()){
-                int cid=rs.getInt("cid");
-                String columnName=rs.getString("name");
-                String columnDataType=rs.getString("type");
-                int isNotNull=rs.getInt("notnull");
-                String defaultValue=rs.getString("dflt_value");
-                int pk=rs.getInt("pk");
-                if(log.isInfoEnabled()){
-                    log.info(cid+"|"+columnName+"|"+columnDataType+"|"+isNotNull+"|"+defaultValue+"|"+pk);
+            while (rs.next()) {
+                int cid = rs.getInt("cid");
+                String columnName = rs.getString("name");
+                String columnDataType = rs.getString("type");
+                int isNotNull = rs.getInt("notnull");
+                String defaultValue = rs.getString("dflt_value");
+                int pk = rs.getInt("pk");
+                if (log.isInfoEnabled()) {
+                    log.info(cid + "|" + columnName + "|" + columnDataType + "|" + isNotNull + "|" + defaultValue + "|" + pk);
                 }
 
-                tableColumns.add(new VTableColumn(new VTableColumnId(cid),new VTableColumnName(columnName),new VTableTableColumnDataType(columnDataType), new VTableColumnNotNull(isNotNull == 1),new VTableDfltValue(defaultValue),new VTableColumnPk(pk)));
+                tableColumns.add(new VTableColumn(new VTableColumnId(cid), new VTableColumnName(columnName), new VTableTableColumnDataType(columnDataType), new VTableColumnNotNull(isNotNull == 1), new VTableDfltValue(defaultValue), new VTableColumnPk(pk)));
             }
 
             rs.close();
@@ -105,85 +104,85 @@ public class TableService {
 
     }
 
-    public VTableRecordCount getTableRecordCount(VTableName tableName){
-        int recordCount=0;
+    public VTableRecordCount getTableRecordCount(VTableName tableName) {
+        int recordCount = 0;
         try {
 
-            Connection conn= getDatabaseService().getvConnection().getConnection();
+            Connection conn = getDatabaseService().getvConnection().getConnection();
             log.info("connection sqlite database success!");
-            Statement st=conn.createStatement();
-            String sql="select count(1) ct from "+tableName.getTableName();
-            ResultSet rs=st.executeQuery(sql);
-            if (rs.next()){
-                recordCount=rs.getInt(1);
-                if(log.isInfoEnabled()){
-                    log.info(recordCount+"|");
+            Statement st = conn.createStatement();
+            String sql = "select count(1) ct from " + tableName.getTableName();
+            ResultSet rs = st.executeQuery(sql);
+            if (rs.next()) {
+                recordCount = rs.getInt(1);
+                if (log.isInfoEnabled()) {
+                    log.info(recordCount + "|");
                 }
             }
             rs.close();
             st.close();
         } catch (Exception e) {
-            log.error("connection test error",e);
+            log.error("connection test error", e);
         }
         return new VTableRecordCount(recordCount);
     }
 
-    public int getTablePageCount(VTableName tableName,VPage page){
-        VTableRecordCount count=getTableRecordCount(tableName);
-        BigDecimal b1=new BigDecimal(count.getRecordCount());
-        BigDecimal b2=new BigDecimal(page.getPageSize().getSize());
-        BigDecimal b3=b1.divide(b2).setScale(0,RoundingMode.CEILING);
+    public int getTablePageCount(VTableName tableName, VPage page) {
+        VTableRecordCount count = getTableRecordCount(tableName);
+        BigDecimal b1 = new BigDecimal(count.getRecordCount());
+        BigDecimal b2 = new BigDecimal(page.getPageSize().getPageSize());
+        BigDecimal b3 = b1.divide(b2).setScale(0, RoundingMode.CEILING);
         return b3.intValue();
     }
 
-    public List<TableColumnView> getTableViewColumns(List<VTableColumn> tableColumnList){
-        List<TableColumnView> tableColumnViews =new LinkedList<>();
-        for(VTableColumn tableColumn:tableColumnList){
-            tableColumnViews.add(new TableColumnView(tableColumn.getId().getCid(),tableColumn.getName().getName()));
+    public List<TableColumnView> getTableViewColumns(List<VTableColumn> tableColumnList) {
+        List<TableColumnView> tableColumnViews = new LinkedList<>();
+        for (VTableColumn tableColumn : tableColumnList) {
+            tableColumnViews.add(new TableColumnView(tableColumn.getId().getCid(), tableColumn.getName().getName()));
         }
         return tableColumnViews;
     }
 
-    public VPage getData(VTableName tableName, VPage VPage){
-        List<Map> tableDataList=new ArrayList<>();
+    public VPage getData(VTableName tableName, VPage vpage) {
+        List<Map> tableDataList = new ArrayList<>();
         try {
-            VTableRecordCount tableRecordCount=getTableRecordCount(tableName);
-            VPageTotalElementsNumber pageTotalElementsNumber=new VPageTotalElementsNumber(tableRecordCount.getRecordCount());
-            VPage.setPageTotalElementsNumber(pageTotalElementsNumber);
-            Connection conn= getDatabaseService().getvConnection().getConnection();
-            Statement st=conn.createStatement();
-            String sql="select * from "+tableName.getTableName();
-            sql=getPageSql(sql,VPage);
+            VTableRecordCount tableRecordCount = getTableRecordCount(tableName);
+            VPageTotalElementsNumber pageTotalElementsNumber = new VPageTotalElementsNumber(tableRecordCount.getRecordCount());
+            vpage.setTotalElementsNumber(pageTotalElementsNumber);
+            Connection conn = getDatabaseService().getvConnection().getConnection();
+            Statement st = conn.createStatement();
+            String sql = "select * from " + tableName.getTableName();
+            sql = getPageSql(sql, vpage);
 
-            ResultSet rs=st.executeQuery(sql);
+            ResultSet rs = st.executeQuery(sql);
 
-            ResultSetMetaData metaData=rs.getMetaData();
+            ResultSetMetaData metaData = rs.getMetaData();
             int maxFiledSize = metaData.getColumnCount();
 
-            while (rs.next()){
-                Map data=new HashMap<>();
-                for(int i=1;i<=maxFiledSize;i++){
-                    data.put(metaData.getColumnName(i),rs.getString(i));
+            while (rs.next()) {
+                Map data = new HashMap<>();
+                for (int i = 1; i <= maxFiledSize; i++) {
+                    data.put(metaData.getColumnName(i), rs.getString(i));
                 }
                 tableDataList.add(data);
             }
-            VPage.setData(tableDataList);
+            vpage.setData(tableDataList);
             rs.close();
             st.close();
         } catch (Exception e) {
-            log.error("get table data error",e);
+            log.error("get table data error", e);
         }
-        return VPage;
+        return vpage;
     }
 
-    public String getPageSql(String sql,VPage page){
-        String pageSql="";
-        if(page.getCurrentPageIndex().getIndex()==0){
-            pageSql=sql+" limit "+page.getPageSize().getSize();
+    public String getPageSql(String sql, VPage page) {
+        String pageSql = "";
+        if (page.getCurrentPageIndex().getPageIndex() == 0) {
+            pageSql = sql + " limit " + page.getPageSize().getPageSize();
             return pageSql;
         }
 
-        pageSql=sql+" limit "+page.getPageSize().getSize()+" OFFSET "+page.getCurrentPageIndex().getIndex()*page.getPageSize().getSize();
+        pageSql = sql + " limit " + page.getPageSize().getPageSize() + " OFFSET " + page.getCurrentPageIndex().getPageIndex() * page.getPageSize().getPageSize();
         return pageSql;
     }
 
@@ -242,4 +241,20 @@ public class TableService {
         stmt.close();
         return rowsAffected;
     }
+
+    public void createTable(VTableName tableName) throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS " + tableName.getTableName() + " (id INTEGER PRIMARY KEY AUTOINCREMENT)";
+        try (Statement stmt = databaseService.getvConnection().getConnection().createStatement()) {
+            stmt.execute(sql);
+        }
+
+    }
+
+    public void renameTable(VTableName oldName, VTableName newName) throws SQLException {
+        String sql = "ALTER TABLE " + oldName.getTableName() + " RENAME TO " + newName.getTableName();
+        try (Statement stmt = databaseService.getvConnection().getConnection().createStatement()) {
+            stmt.execute(sql);
+        }
+    }
+
 }
