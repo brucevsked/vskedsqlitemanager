@@ -12,7 +12,7 @@ future plan:
 2. show tables use tree view ok
 3. add table ok
 4. edit table ok
-5. remove table todo
+5. remove table ok
 6. generate test data todo
 7. table column add notes todo
 8. edit table column ok

@@ -16,6 +16,7 @@ import com.vsked.sqlitemanager.domain.VTable;
 import com.vsked.sqlitemanager.domain.VTableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Connection;
@@ -252,6 +253,13 @@ public class TableService {
 
     public void renameTable(VTableName oldName, VTableName newName) throws SQLException {
         String sql = "ALTER TABLE " + oldName.getTableName() + " RENAME TO " + newName.getTableName();
+        try (Statement stmt = databaseService.getvConnection().getConnection().createStatement()) {
+            stmt.execute(sql);
+        }
+    }
+
+    public void deleteTable(VTableName tableName) throws SQLException {
+        String sql = "DROP TABLE IF EXISTS " + tableName.getTableName();
         try (Statement stmt = databaseService.getvConnection().getConnection().createStatement()) {
             stmt.execute(sql);
         }

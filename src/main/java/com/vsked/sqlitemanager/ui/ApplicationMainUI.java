@@ -537,15 +537,23 @@ public class ApplicationMainUI extends Application {
             showAddTableDialog(); // 点击时弹出添加表的对话框
         });
         tableContextMenu.getItems().add(addTableMenuItem); // 添加到上下文菜单中
-MenuItem renameTableMenuItem = I18N.menuItemForKey("tree.contextMenu.renameTable");
-renameTableMenuItem.setOnAction(event -> {
-    TreeItem<String> selectedItem = systemViewTree.getSelectionModel().getSelectedItem();
-    if (selectedItem != null && selectedItem.getParent().getValue().equals(tablesItem.getValue())) {
-        VTableName oldTableName = new VTableName(selectedItem.getValue());
-        showRenameTableDialog(oldTableName, selectedItem);
-    }
-});
-tableContextMenu.getItems().add(renameTableMenuItem); // 添加到上下文菜单中
+        MenuItem renameTableMenuItem = I18N.menuItemForKey("tree.contextMenu.renameTable");
+        renameTableMenuItem.setOnAction(event -> {
+            TreeItem<String> selectedItem = systemViewTree.getSelectionModel().getSelectedItem();
+            if (selectedItem != null && selectedItem.getParent().getValue().equals(tablesItem.getValue())) {
+                VTableName oldTableName = new VTableName(selectedItem.getValue());
+                showRenameTableDialog(oldTableName, selectedItem);
+            }
+        });
+        tableContextMenu.getItems().add(renameTableMenuItem); // 添加到上下文菜单中
+        MenuItem deleteTableMenuItem = I18N.menuItemForKey("tree.contextMenu.deleteTable");
+        deleteTableMenuItem.setOnAction(event -> {
+            TreeItem<String> selectedItem = systemViewTree.getSelectionModel().getSelectedItem();
+            if (selectedItem != null && selectedItem.getParent().getValue().equals(tablesItem.getValue())) {
+                showDeleteTableDialog(new VTableName(selectedItem.getValue()), selectedItem);
+            }
+        });
+        tableContextMenu.getItems().add(deleteTableMenuItem); // 添加到上下文菜单中
 
 
         MenuItem editTableStructureMenuItem = I18N.menuItemForKey("tree.contextMenu.editTable");
@@ -602,54 +610,83 @@ tableContextMenu.getItems().add(renameTableMenuItem); // 添加到上下文菜�
 
         stage.show();
     }
-private void showRenameTableDialog(VTableName oldTableName, TreeItem<String> tableItem) {
-    Dialog<String> dialog = new Dialog<>();
-    dialog.setTitle("重命名表");
-    dialog.setHeaderText("请输入新的表名");
 
-    ButtonType renameButtonType = new ButtonType("重命名", ButtonBar.ButtonData.OK_DONE);
-    dialog.getDialogPane().getButtonTypes().addAll(renameButtonType, ButtonType.CANCEL);
+    private void showDeleteTableDialog(VTableName tableName, TreeItem<String> tableItem) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(I18N.get("alert.confirmDeleteTable.title"));
+        alert.setHeaderText(I18N.get("alert.confirmDeleteTable.header", tableName.getTableName()));
+        alert.setContentText(I18N.get("alert.confirmDeleteTable.content", tableName.getTableName()));
 
-    TextField tableNameField = new TextField(oldTableName.getTableName());
-    tableNameField.setPromptText("新表名");
+        ButtonType buttonTypeYes = new ButtonType(I18N.get("alert.confirmDeleteTable.Yes"));
+        ButtonType buttonTypeNo = new ButtonType(I18N.get("alert.confirmDeleteTable.No"), ButtonBar.ButtonData.CANCEL_CLOSE);
 
-    GridPane grid = new GridPane();
-    grid.setHgap(10);
-    grid.setVgap(10);
-    grid.add(new Label("新表名:"), 0, 0);
-    grid.add(tableNameField, 1, 0);
+        alert.getButtonTypes().setAll(buttonTypeYes, buttonTypeNo);
 
-    dialog.getDialogPane().setContent(grid);
+        alert.showAndWait().ifPresent(type -> {
+            if (type == buttonTypeYes) {
+                try {
+                    TableService tableService = new TableService(getDatabaseService());
+                    tableService.deleteTable(tableName); // 调用服务层删除表
 
-    Node renameButton = dialog.getDialogPane().lookupButton(renameButtonType);
-    renameButton.setDisable(true); // 初始禁用按钮
+                    // 更新左侧树视图
+                    tableItem.getParent().getChildren().remove(tableItem);
 
-    // 输入非空验证
-    tableNameField.textProperty().addListener((observable, oldValue, newValue) -> {
-        renameButton.setDisable(newValue.trim().isEmpty() || newValue.equals(oldTableName.getTableName()));
-    });
+                } catch (Exception e) {
+                    Alert errorAlert = new Alert(Alert.AlertType.ERROR, "删除失败: " + e.getMessage());
+                    errorAlert.show();
+                }
+            }
+        });
+    }
 
-    dialog.setResultConverter(dialogButton -> {
-        if (dialogButton == renameButtonType) {
-            return tableNameField.getText();
-        }
-        return null;
-    });
+    private void showRenameTableDialog(VTableName oldTableName, TreeItem<String> tableItem) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("重命名表");
+        dialog.setHeaderText("请输入新的表名");
 
-    dialog.showAndWait().ifPresent(newTableName -> {
-        try {
-            TableService tableService = new TableService(getDatabaseService());
-            tableService.renameTable(oldTableName, new VTableName(newTableName)); // 调用服务层重命名表
+        ButtonType renameButtonType = new ButtonType("重命名", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(renameButtonType, ButtonType.CANCEL);
 
-            // 更新左侧树视图
-            tableItem.setValue(newTableName);
+        TextField tableNameField = new TextField(oldTableName.getTableName());
+        tableNameField.setPromptText("新表名");
 
-        } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "重命名失败: " + e.getMessage());
-            alert.show();
-        }
-    });
-}
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.add(new Label("新表名:"), 0, 0);
+        grid.add(tableNameField, 1, 0);
+
+        dialog.getDialogPane().setContent(grid);
+
+        Node renameButton = dialog.getDialogPane().lookupButton(renameButtonType);
+        renameButton.setDisable(true); // 初始禁用按钮
+
+        // 输入非空验证
+        tableNameField.textProperty().addListener((observable, oldValue, newValue) -> {
+            renameButton.setDisable(newValue.trim().isEmpty() || newValue.equals(oldTableName.getTableName()));
+        });
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == renameButtonType) {
+                return tableNameField.getText();
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(newTableName -> {
+            try {
+                TableService tableService = new TableService(getDatabaseService());
+                tableService.renameTable(oldTableName, new VTableName(newTableName)); // 调用服务层重命名表
+
+                // 更新左侧树视图
+                tableItem.setValue(newTableName);
+
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "重命名失败: " + e.getMessage());
+                alert.show();
+            }
+        });
+    }
 
     private void showEditTableStructureDialog(VTableName tableName) {
         Dialog<Void> dialog = new Dialog<>();
