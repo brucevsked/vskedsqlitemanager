@@ -303,13 +303,13 @@ public class ApplicationMainUI extends Application {
                 } catch (SQLException e) {
                     log.error("Query execution failed", e);
                     Platform.runLater(() -> {
-                        Alert alert = new Alert(Alert.AlertType.ERROR, "SQL错误: " + e.getMessage());
+                        Alert alert = new Alert(Alert.AlertType.ERROR, I18N.get("alert.sql.error") + e.getMessage());
                         alert.show();
                     });
                 } catch (Exception e) {
                     log.error("Unexpected error", e);
                     Platform.runLater(() -> {
-                        Alert alert = new Alert(Alert.AlertType.ERROR, "发生未知错误: " + e.getMessage());
+                        Alert alert = new Alert(Alert.AlertType.ERROR, I18N.get("alert.unknow.error") + e.getMessage());
                         alert.show();
                     });
                 }
@@ -415,7 +415,6 @@ public class ApplicationMainUI extends Application {
         systemViewTree = new TreeView<>(); // 初始化
 
         centerTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
-            log.trace("you have change panel ---------------");
 
             if (newTab == null) {
                 log.warn("Selected tab is null. Possibly a tab was closed.");
@@ -522,14 +521,6 @@ public class ApplicationMainUI extends Application {
 
         systemViewTree.setShowRoot(false);
 
-        ContextMenu treeContextMenu = new ContextMenu();
-        MenuItem refreshItem = new MenuItem("Refresh");
-        refreshItem.setOnAction(event -> {
-            // 刷新树形结构
-            //TODO refresh tree
-        });
-        treeContextMenu.getItems().add(refreshItem);
-        systemViewTree.setContextMenu(treeContextMenu);
 
         ContextMenu tableContextMenu = new ContextMenu();
         MenuItem addTableMenuItem = I18N.menuItemForKey("tree.contextMenu.addTable"); // 国际化支持
