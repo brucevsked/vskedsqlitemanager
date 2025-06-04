@@ -2,6 +2,12 @@
 ## support Multi-Language
 ## use javaFx build user interface
 
+### techlogy used
+#### log4j2 2.19.0
+#### testng 7.7.1
+#### javaFX 23.0.2
+#### sqlite driver 3.49.0.0
+
 this is a sqlite manager application  
 I write it by java Language  
 If you have any question submit issue  
@@ -28,7 +34,28 @@ future plan:
 
 # Good Luck for every one
 
-# 未来还可以写一个接口测试工具，支持http协议 get,post，支持websocket协议，支持rsocket协议，支持tcp客户端，服务端，支持udp客户端，服务端，支持mqtt客户端，服务端。
+# screen shoot
+## edit table
+![pic1](screenshoot/editTableCn.png)
+
+![pic2](screenshoot/editTableEn.png)
+## query result
+![pic3](screenshoot/queryResultCn.png)
+
+![pic4](screenshoot/queryResultEn.png)
+## table data list
+![pic5](screenshoot/TableDataListCn.png)
+
+![pic6](screenshoot/TableDataListEn.png)
+
+## update success
+![pic7](screenshoot/updateSuccessCn.png)
+![pic8](screenshoot/updateSuccessEn.png)
+
+
+
+未来还可以写一个接口测试工具，支持http协议 get,post，支持websocket协议，支持rsocket协议，支持tcp客户端，服务端，支持udp客户端，服务端，支持mqtt客户端，服务端。
+可以写一个通过网页操作来运行window与linux命令的服务，这样就可以在任意机器使用浏览器打开熟悉的环境了
 
 
 SELECT name FROM sqlite_master WHERE type='table'
