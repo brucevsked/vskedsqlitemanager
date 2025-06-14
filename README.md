@@ -32,8 +32,6 @@ future plan:
 16. backup database todo
 17. when table data is empty show empty table bug fix todo
 
-# Good Luck for every one
-
 # screen shoot
 ## edit table
 ![pic1](screenshoot/editTableCn.png)
@@ -52,10 +50,6 @@ future plan:
 ![pic7](screenshoot/updateSuccessCn.png)
 ![pic8](screenshoot/updateSuccessEn.png)
 
-
-
-未来还可以写一个接口测试工具，支持http协议 get,post，支持websocket协议，支持rsocket协议，支持tcp客户端，服务端，支持udp客户端，服务端，支持mqtt客户端，服务端。
-可以写一个通过网页操作来运行window与linux命令的服务，这样就可以在任意机器使用浏览器打开熟悉的环境了
 
 
 SELECT name FROM sqlite_master WHERE type='table'
