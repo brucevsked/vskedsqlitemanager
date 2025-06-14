@@ -157,5 +157,11 @@ public class I18N {
         return alert;
     }
 
+    public static Alert alertOnlyContentForKey(Alert.AlertType alertType, final String contentTextKey, final Object... args){
+        Alert alert = new Alert(alertType);
+        alert.contentTextProperty().bind(createStringBinding(contentTextKey,args));
+        return alert;
+    }
+
 
 }

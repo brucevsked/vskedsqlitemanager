@@ -525,9 +525,9 @@ public class ApplicationMainUI extends Application {
         ContextMenu tableContextMenu = new ContextMenu();
         MenuItem addTableMenuItem = I18N.menuItemForKey("tree.contextMenu.addTable"); // 国际化支持
         addTableMenuItem.setOnAction(event -> {
-            showAddTableDialog(); // 点击时弹出添加表的对话框
+            showAddTableDialog();
         });
-        tableContextMenu.getItems().add(addTableMenuItem); // 添加到上下文菜单中
+        tableContextMenu.getItems().add(addTableMenuItem);
         MenuItem renameTableMenuItem = I18N.menuItemForKey("tree.contextMenu.renameTable");
         renameTableMenuItem.setOnAction(event -> {
             TreeItem<String> selectedItem = systemViewTree.getSelectionModel().getSelectedItem();
@@ -536,7 +536,7 @@ public class ApplicationMainUI extends Application {
                 showRenameTableDialog(oldTableName, selectedItem);
             }
         });
-        tableContextMenu.getItems().add(renameTableMenuItem); // 添加到上下文菜单中
+        tableContextMenu.getItems().add(renameTableMenuItem);
         MenuItem deleteTableMenuItem = I18N.menuItemForKey("tree.contextMenu.deleteTable");
         deleteTableMenuItem.setOnAction(event -> {
             TreeItem<String> selectedItem = systemViewTree.getSelectionModel().getSelectedItem();
@@ -544,7 +544,7 @@ public class ApplicationMainUI extends Application {
                 showDeleteTableDialog(new VTableName(selectedItem.getValue()), selectedItem);
             }
         });
-        tableContextMenu.getItems().add(deleteTableMenuItem); // 添加到上下文菜单中
+        tableContextMenu.getItems().add(deleteTableMenuItem);
 
 
         MenuItem editTableStructureMenuItem = I18N.menuItemForKey("tree.contextMenu.editTable");
@@ -632,10 +632,10 @@ public class ApplicationMainUI extends Application {
 
     private void showRenameTableDialog(VTableName oldTableName, TreeItem<String> tableItem) {
         Dialog<String> dialog = new Dialog<>();
-        dialog.setTitle("重命名表");
-        dialog.setHeaderText("请输入新的表名");
+        dialog.setTitle(I18N.get("dialog.title.renameTable"));
+        dialog.setHeaderText(I18N.get("dialog.header.renameTable"));
 
-        ButtonType renameButtonType = new ButtonType("重命名", ButtonBar.ButtonData.OK_DONE);
+        ButtonType renameButtonType = new ButtonType(I18N.get("dialog.title.renameTable"), ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(renameButtonType, ButtonType.CANCEL);
 
         TextField tableNameField = new TextField(oldTableName.getTableName());
@@ -667,7 +667,7 @@ public class ApplicationMainUI extends Application {
         dialog.showAndWait().ifPresent(newTableName -> {
             try {
                 TableService tableService = new TableService(getDatabaseService());
-                tableService.renameTable(oldTableName, new VTableName(newTableName)); // 调用服务层重命名表
+                tableService.renameTable(oldTableName, new VTableName(newTableName));
 
                 // 更新左侧树视图
                 tableItem.setValue(newTableName);
@@ -715,31 +715,30 @@ public class ApplicationMainUI extends Application {
         ObservableList<VTableColumn> observableColumns = FXCollections.observableArrayList(tableColumns);
         tableStructureView.setItems(observableColumns);
 
-        //启用表格编辑功能
         tableStructureView.setEditable(true);
 
-        // 添加按钮
-        Button addButton = new Button("添加字段");
+
+        Button addButton = I18N.buttonForKey("button.addField");
         addButton.setOnAction(event -> {
             showAddFieldDialog(tableName, tableStructureView.getItems());
         });
 
-        Button modifyButton = new Button("修改字段");
+        Button modifyButton = I18N.buttonForKey("button.editField");
         modifyButton.setOnAction(event -> {
             VTableColumn selectedColumn = tableStructureView.getSelectionModel().getSelectedItem();
             if (selectedColumn == null) {
-                Alert alert = new Alert(Alert.AlertType.WARNING, "请先选择一个字段！");
+                Alert alert = I18N.alertOnlyContentForKey(Alert.AlertType.WARNING, "alert.pleaseSelectField");
                 alert.show();
                 return;
             }
             showModifyFieldDialog(tableName, selectedColumn, tableStructureView.getItems());
         });
 
-        Button deleteButton = new Button("删除字段");
+        Button deleteButton = I18N.buttonForKey("button.deleteField");
         deleteButton.setOnAction(event -> {
             VTableColumn selectedColumn = tableStructureView.getSelectionModel().getSelectedItem();
             if (selectedColumn == null) {
-                Alert alert = new Alert(Alert.AlertType.WARNING, "请先选择一个字段！");
+                Alert alert = I18N.alertOnlyContentForKey(Alert.AlertType.WARNING, "alert.pleaseSelectField");
                 alert.show();
                 return;
             }
@@ -750,7 +749,7 @@ public class ApplicationMainUI extends Application {
             }
         });
 
-        Button saveButton = new Button("保存更改");
+        Button saveButton = I18N.buttonForKey("button.saveChange");
         saveButton.setOnAction(event -> {
             try {
                 saveTableChanges(tableName, tableStructureView.getItems());
@@ -777,8 +776,8 @@ public class ApplicationMainUI extends Application {
 
     private void showAddTableDialog() {
         Dialog<String> dialog = new Dialog<>();
-        dialog.setTitle("添加新表");
-        dialog.setHeaderText("请输入新表的名称");
+        dialog.setTitle(I18N.get("dialog.title.addNewTable"));
+        dialog.setHeaderText(I18N.get("dialog.title.setNewTableName"));
 
         ButtonType addButtonType = new ButtonType("添加", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
