@@ -3,6 +3,7 @@
 ## use javaFx build user interface
 
 ### techlogy used
+#### java 21.0.6
 #### log4j2 2.19.0
 #### testng 7.7.1
 #### javaFX 23.0.2
@@ -51,6 +52,10 @@ future plan:
 ![pic8](screenshoot/updateSuccessEn.png)
 
 
+## TODO
+add unit test for every method
+
+## sqlite query
 
 SELECT name FROM sqlite_master WHERE type='table'
 
