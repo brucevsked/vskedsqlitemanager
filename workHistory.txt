@@ -258,6 +258,13 @@ I have a little time to update my sqllite manager project.
 have you use AI help you write some code or solve some hard question?
 maybe we can use ai replace search engine in the future
 
+--------------------------------------------------------------------------------
+20250621
+
+I found the ApplicationMainUI has a lot of codes
+So I write small module
+Maybe I can use this module in ApplicationMainUI later
+
 
 I will install a virtual machine.
 because there was a lot of virus in internet

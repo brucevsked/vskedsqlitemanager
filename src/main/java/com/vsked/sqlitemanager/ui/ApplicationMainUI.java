@@ -602,7 +602,7 @@ public class ApplicationMainUI extends Application {
         stage.show();
     }
 
-    private void showDeleteTableDialog(VTableName tableName, TreeItem<String> tableItem) {
+    void showDeleteTableDialog(VTableName tableName, TreeItem<String> tableItem) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle(I18N.get("alert.confirmDeleteTable.title"));
         alert.setHeaderText(I18N.get("alert.confirmDeleteTable.header", tableName.getTableName()));
@@ -630,7 +630,7 @@ public class ApplicationMainUI extends Application {
         });
     }
 
-    private void showRenameTableDialog(VTableName oldTableName, TreeItem<String> tableItem) {
+    void showRenameTableDialog(VTableName oldTableName, TreeItem<String> tableItem) {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle(I18N.get("dialog.title.renameTable"));
         dialog.setHeaderText(I18N.get("dialog.header.renameTable"));
@@ -679,7 +679,7 @@ public class ApplicationMainUI extends Application {
         });
     }
 
-    private void showEditTableStructureDialog(VTableName tableName) {
+    void showEditTableStructureDialog(VTableName tableName) {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("编辑表结构 - " + tableName.getTableName());
 
@@ -774,7 +774,7 @@ public class ApplicationMainUI extends Application {
         dialog.show();
     }
 
-    private void showAddTableDialog() {
+    void showAddTableDialog() {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle(I18N.get("dialog.title.addNewTable"));
         dialog.setHeaderText(I18N.get("dialog.title.setNewTableName"));

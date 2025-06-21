@@ -16,7 +16,6 @@ import com.vsked.sqlitemanager.domain.VTable;
 import com.vsked.sqlitemanager.domain.VTableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Connection;
@@ -264,5 +263,97 @@ public class TableService {
             stmt.execute(sql);
         }
     }
+
+public void modifyColumn(VTableName tableName, String oldColumnName, String newColumnName, String newDataType, boolean isNotNull) throws SQLException {
+    Connection conn = null;
+    Statement stmt = null;
+
+    String tempTableName = tableName.getTableName() + "_temp";
+
+    try {
+        conn = databaseService.getvConnection().getConnection();
+        stmt = conn.createStatement();
+
+        // Step 1: 创建临时表，包含修改后的结构
+        StringBuilder createTempTableSql = new StringBuilder("CREATE TABLE ").append(tempTableName).append(" AS SELECT ");
+
+        List<VTableColumn> columns = getColumns(tableName);
+        for (VTableColumn column : columns) {
+            String colName = column.getName().getName();
+            if (colName.equalsIgnoreCase(oldColumnName)) {
+                // 替换字段名
+                createTempTableSql.append(colName).append(" AS ").append(newColumnName);
+            } else {
+                createTempTableSql.append(colName);
+            }
+            createTempTableSql.append(", ");
+        }
+
+        // 删除最后一个逗号和空格
+        createTempTableSql.setLength(createTempTableSql.length() - 2);
+        createTempTableSql.append(" FROM ").append(tableName.getTableName());
+
+        stmt.execute(createTempTableSql.toString());
+
+        // Step 2: 添加新的列（如果字段类型或约束有变化）
+        String alterTempTableSql = "ALTER TABLE " + tempTableName + " ADD COLUMN temp_col TEXT";
+        stmt.execute(alterTempTableSql);
+
+        String updateTempTableSql = "UPDATE " + tempTableName + " SET temp_col = " + newColumnName;
+        stmt.execute(updateTempTableSql);
+
+        // Step 3: 删除旧表
+        String dropOldTableSql = "DROP TABLE " + tableName.getTableName();
+        stmt.execute(dropOldTableSql);
+
+        // Step 4: 将临时表重命名为原表名
+        String renameTempTableSql = "ALTER TABLE " + tempTableName + " RENAME TO " + tableName.getTableName();
+        stmt.execute(renameTempTableSql);
+
+        // Step 5: 重建字段的数据类型和约束
+        StringBuilder recreateFinalTableSql = new StringBuilder("CREATE TABLE ").append(tableName.getTableName()).append(" (");
+        for (VTableColumn column : columns) {
+            String colName = column.getName().getName();
+            if (colName.equalsIgnoreCase(oldColumnName)) {
+                recreateFinalTableSql.append(newColumnName).append(" ").append(newDataType);
+                if (isNotNull) {
+                    recreateFinalTableSql.append(" NOT NULL");
+                }
+            } else {
+                recreateFinalTableSql.append(colName).append(" ").append(column.getDataType().getDataType());
+                if (column.getNotNull().isNotNull()) {
+                    recreateFinalTableSql.append(" NOT NULL");
+                }
+            }
+            recreateFinalTableSql.append(", ");
+        }
+
+        // 删除最后一个逗号和空格
+        recreateFinalTableSql.setLength(recreateFinalTableSql.length() - 2);
+        recreateFinalTableSql.append(")");
+
+        stmt.execute(recreateFinalTableSql.toString());
+
+        // Step 6: 将数据从临时表复制回主表
+        StringBuilder copyDataSql = new StringBuilder("INSERT INTO ")
+                .append(tableName.getTableName()).append(" SELECT * FROM ").append(tempTableName);
+
+        stmt.execute(copyDataSql.toString());
+
+        // Step 7: 删除临时表
+        String dropTempTableSql = "DROP TABLE " + tempTableName;
+        stmt.execute(dropTempTableSql);
+
+    } catch (SQLException e) {
+        throw new SQLException("Failed to modify column: " + oldColumnName, e);
+    } finally {
+        if (stmt != null) {
+            stmt.close();
+        }
+        if (conn != null && !conn.isClosed()) {
+            conn.close();
+        }
+    }
+}
 
 }
