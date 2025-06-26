@@ -1162,7 +1162,7 @@ public class ApplicationMainUI extends Application {
         executeUpdate(dropTempTableSql);
     }
 
-    private TableView<Map> createPage(VPage page, VTableName currentTableName) {
+    TableView<Map> createPage(VPage page, VTableName currentTableName) {
 
         TableView<Map> tableView = new TableView<>();
 
@@ -1191,7 +1191,7 @@ public class ApplicationMainUI extends Application {
      *
      * @param locale the new local to set
      */
-    private void switchLanguage(Locale locale) {
+    public static void switchLanguage(Locale locale) {
         I18N.setLocale(locale);
     }
 }

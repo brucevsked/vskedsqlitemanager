@@ -23,7 +23,7 @@ public class ApplicationService {
         return databaseFile;
     }
 
-    public void exit(){
+    public static void exit(){
         Platform.exit();
     }
 }

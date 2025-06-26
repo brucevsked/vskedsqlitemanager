@@ -1,53 +1,89 @@
 package com.vsked.sqlitemanager.ui;
 
+import com.vsked.sqlitemanager.domain.VDatabaseFile;
+import com.vsked.sqlitemanager.domain.VTable;
+import com.vsked.sqlitemanager.domain.VTableList;
+import com.vsked.sqlitemanager.services.ApplicationService;
+import com.vsked.sqlitemanager.services.DatabaseService;
 import com.vsked.sqlitemanager.services.I18N;
+import com.vsked.sqlitemanager.services.TableService;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Locale;
 
 public class MenuAndToolbarManager {
+    private static final Logger log = LoggerFactory.getLogger(MenuAndToolbarManager.class);
 
-    private ApplicationMainUI applicationMainUI;
+    ApplicationMainUI applicationMainUI;
+    Menu englishMenu = I18N.menuForKey("menu.english");
+    Menu chineseMenu = I18N.menuForKey("menu.chinese");
+    Menu fileExitMenu = I18N.menuForKey("menuItem.exit");
 
     public MenuAndToolbarManager(ApplicationMainUI applicationMainUI) {
         this.applicationMainUI = applicationMainUI;
     }
 
-    public MenuBar createMenuBar() {
+    public MenuBar createMenuBar(Stage stage) {
         MenuBar menuBar = new MenuBar();
-        menuBar.setMinWidth(applicationMainUI.getPrimaryStage().getMaxWidth());
+        menuBar.setMinWidth(stage.getMaxWidth());
 
         Menu fileMenu = I18N.menuForKey("menu.file");
         Menu fileOpenMenu = I18N.menuForKey("menuItem.open");
-        Menu fileExitMenu = I18N.menuForKey("menuItem.exit");
+
+        fileOpenMenu.setOnAction(event -> {
+            if (log.isTraceEnabled()) {
+                log.trace("You click the file open menu from menu Item");
+            }
+            //TODO modify this action
+            log.info("{}", event);
+
+            VDatabaseFile databaseFile = applicationService.openDataBaseFile(stage);
+
+            setDatabaseService(new DatabaseService(databaseFile));
+
+            TableService tableService = new TableService(getDatabaseService());
+            VTableList vTableList = tableService.getTables();
+            List<VTable> tableList = vTableList.getTables();
+            for (VTable table : tableList) {
+                TreeItem<String> tablesItemNode = new TreeItem<>(table.getTableName().getTableName());
+                tablesItem.getChildren().add(tablesItemNode);
+            }
+
+            tablesItem.setExpanded(true);
+
+        });
+
 
         fileExitMenu.setOnAction(event -> {
-            if (applicationMainUI.getLog().isTraceEnabled()) {
-                applicationMainUI.getLog().trace("You click the file exit menu from menu Item");
+            if (log.isTraceEnabled()) {
+                log.trace("You click the file exit menu from menu Item");
             }
-            applicationMainUI.getLog().info("{}", event.toString());
-            applicationMainUI.getApplicationService().exit();
+            log.info("{}", event.toString());
+            ApplicationService.exit();
         });
 
         Menu languageMenu = I18N.menuForKey("menu.language");
-        Menu englishMenu = I18N.menuForKey("menu.english");
-        Menu chineseMenu = I18N.menuForKey("menu.chinese");
+
 
         englishMenu.setOnAction(event -> {
-            if (applicationMainUI.getLog().isTraceEnabled()) {
-                applicationMainUI.getLog().trace("You click the english menu from menu Item");
+            if (log.isTraceEnabled()) {
+                log.trace("You click the english menu from menu Item");
             }
-            applicationMainUI.switchLanguage(Locale.ENGLISH);
-            applicationMainUI.getLog().info("{}", event);
+            ApplicationMainUI.switchLanguage(Locale.ENGLISH);
+            log.info("{}", event);
         });
 
         chineseMenu.setOnAction(event -> {
-            if (applicationMainUI.getLog().isTraceEnabled()) {
-                applicationMainUI.getLog().trace("You click the chinese menu from menu Item");
+            if (log.isTraceEnabled()) {
+                log.trace("You click the chinese menu from menu Item");
             }
-            applicationMainUI.switchLanguage(Locale.CHINESE);
-            applicationMainUI.getLog().info("{}", event);
+            ApplicationMainUI.switchLanguage(Locale.CHINESE);
+            log.info("{}", event);
         });
 
         fileMenu.getItems().add(fileOpenMenu);
@@ -62,7 +98,7 @@ public class MenuAndToolbarManager {
         return menuBar;
     }
 
-    public ToolBar createToolBar() {
+    public ToolBar createToolBar(Stage stage) {
         ToolBar toolBar = new ToolBar();
         Button openBt = I18N.buttonForKey("button.open");
         Button newQueryBt = I18N.buttonForKey("button.newQuery");
@@ -70,12 +106,12 @@ public class MenuAndToolbarManager {
         Button chineseBt = I18N.buttonForKey("button.chinese");
         Button exitBt = I18N.buttonForKey("button.exit");
 
-        englishBt.setOnAction(applicationMainUI.getEnglishMenu().getOnAction());
-        chineseBt.setOnAction(applicationMainUI.getChineseMenu().getOnAction());
-        exitBt.setOnAction(applicationMainUI.getFileExitMenu().getOnAction());
+        englishBt.setOnAction(englishMenu.getOnAction());
+        chineseBt.setOnAction(chineseMenu.getOnAction());
+        exitBt.setOnAction(fileExitMenu.getOnAction());
 
         toolBar.getItems().addAll(openBt, newQueryBt, englishBt, chineseBt, exitBt);
-        toolBar.setMinWidth(applicationMainUI.getPrimaryStage().getMaxWidth());
+        toolBar.setMinWidth(stage.getMaxWidth());
 
         return toolBar;
     }
