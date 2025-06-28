@@ -59,13 +59,13 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import static com.vsked.sqlitemanager.ui.LanguageManager.switchLanguage;
 
 
 public class ApplicationMainUI extends Application {
@@ -124,7 +124,6 @@ public class ApplicationMainUI extends Application {
             log.trace("welcome to vsked SQLite manager");
         }
         launch(args);
-
     }
 
 
@@ -1185,13 +1184,4 @@ public class ApplicationMainUI extends Application {
         return tableView;
     }
 
-
-    /**
-     * sets the given Locale in the I18N class and keeps count of the number of switches.
-     *
-     * @param locale the new local to set
-     */
-    public static void switchLanguage(Locale locale) {
-        I18N.setLocale(locale);
-    }
 }

@@ -20,13 +20,17 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
 public class QueryTabManager {
+    private static final Logger log = LoggerFactory.getLogger(QueryTabManager.class);
 
     private ApplicationMainUI applicationMainUI;
+
 
     public QueryTabManager(ApplicationMainUI applicationMainUI) {
         this.applicationMainUI = applicationMainUI;
@@ -56,18 +60,18 @@ public class QueryTabManager {
         MenuItem selectAllMenuItem = I18N.menuItemForKey("queryPanel.textarea.contextMenu.selectAll");
 
         cutMenuItem.setOnAction(actionEvent4 -> {
-            if (applicationMainUI.getLog().isTraceEnabled()) {
-                applicationMainUI.getLog().trace("you click cut menu from contextMenu");
+            if (log.isTraceEnabled()) {
+                log.trace("you click cut menu from contextMenu");
             }
-            applicationMainUI.getLog().info("{}", actionEvent4);
+            log.info("{}", actionEvent4);
             applicationMainUI.getCurrentQueryTextArea().cut();
         });
 
         copyMenuItem.setOnAction(actionEvent3 -> {
-            if (applicationMainUI.getLog().isTraceEnabled()) {
-                applicationMainUI.getLog().trace("you click copy menu from contextMenu");
+            if (log.isTraceEnabled()) {
+                log.trace("you click copy menu from contextMenu");
             }
-            applicationMainUI.getLog().info("{}", actionEvent3);
+            log.info("{}", actionEvent3);
             TextArea textArea = applicationMainUI.getCurrentQueryTextArea();
             if (!textArea.getSelectedText().isEmpty()) {
                 ClipboardContent content = new ClipboardContent();
@@ -75,24 +79,24 @@ public class QueryTabManager {
                 Clipboard clipboard = Clipboard.getSystemClipboard();
                 clipboard.setContent(content);
             } else {
-                applicationMainUI.getLog().trace("you click copy menu from contextMenu.No text selected to copy.");
+                log.trace("you click copy menu from contextMenu.No text selected to copy.");
             }
         });
 
         pasteMenuItem.setOnAction(actionEvent2 -> {
-            if (applicationMainUI.getLog().isTraceEnabled()) {
-                applicationMainUI.getLog().trace("you click paste menu from contextMenu");
+            if (log.isTraceEnabled()) {
+                log.trace("you click paste menu from contextMenu");
             }
-            applicationMainUI.getLog().info("{}", actionEvent2);
+            log.info("{}", actionEvent2);
             applicationMainUI.getCurrentQueryTextArea().paste();
         });
 
         selectAllMenuItem.setOnAction(actionEvent1 -> {
-            if (applicationMainUI.getLog().isTraceEnabled()) {
-                applicationMainUI.getLog().trace("you click select all menu from contextMenu");
+            if (log.isTraceEnabled()) {
+                log.trace("you click select all menu from contextMenu");
             }
-            if (applicationMainUI.getLog().isDebugEnabled()) {
-                applicationMainUI.getLog().debug("{}", actionEvent1.getSource());
+            if (log.isDebugEnabled()) {
+                log.debug("{}", actionEvent1.getSource());
             }
             applicationMainUI.getCurrentQueryTextArea().selectAll();
         });
@@ -136,26 +140,26 @@ public class QueryTabManager {
                 }
 
             } catch (SQLException e) {
-                applicationMainUI.getLog().error("Query execution failed", e);
+                log.error("Query execution failed", e);
                 Platform.runLater(() -> {
                     Alert alert = new Alert(Alert.AlertType.ERROR, I18N.get("alert.sql.error") + e.getMessage());
                     alert.show();
                 });
             } catch (Exception e) {
-                applicationMainUI.getLog().error("Unexpected error", e);
+                log.error("Unexpected error", e);
                 Platform.runLater(() -> {
                     Alert alert = new Alert(Alert.AlertType.ERROR, I18N.get("alert.unknow.error") + e.getMessage());
                     alert.show();
                 });
             }
-            applicationMainUI.getLog().info("{}", actionEvent6);
+            log.info("{}", actionEvent6);
         });
 
         stopQueryButton.setOnAction(actionEvent5 -> {
-            if (applicationMainUI.getLog().isTraceEnabled()) {
-                applicationMainUI.getLog().trace("You click stop query button from query grid");
+            if (log.isTraceEnabled()) {
+                log.trace("You click stop query button from query grid");
             }
-            applicationMainUI.getLog().info("{}", actionEvent5);
+            log.info("{}", actionEvent5);
         });
 
         tab.setOnSelectionChanged(event -> {

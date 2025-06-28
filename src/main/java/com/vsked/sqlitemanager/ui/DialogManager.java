@@ -58,18 +58,19 @@ public class DialogManager {
 
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(tableName -> {
-            try {
-                TableService tableService = new TableService(applicationMainUI.getDatabaseService());
-                tableService.createTable(new VTableName(tableName));
-
-                TreeItem<String> tablesNode = (TreeItem<String>) applicationMainUI.getSystemViewTree().getRoot().getChildren().get(0);
-                tablesNode.getChildren().add(new TreeItem<>(tableName));
-                tablesNode.setExpanded(true);
-
-            } catch (Exception e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "创建表失败: " + e.getMessage());
-                alert.show();
-            }
+            //TODO add table
+//            try {
+//                TableService tableService = new TableService(applicationMainUI.getDatabaseService());
+//                tableService.createTable(new VTableName(tableName));
+//
+//                TreeItem<String> tablesNode = (TreeItem<String>) applicationMainUI.getSystemViewTree().getRoot().getChildren().get(0);
+//                tablesNode.getChildren().add(new TreeItem<>(tableName));
+//                tablesNode.setExpanded(true);
+//
+//            } catch (Exception e) {
+//                Alert alert = new Alert(Alert.AlertType.ERROR, "创建表失败: " + e.getMessage());
+//                alert.show();
+//            }
         });
     }
 

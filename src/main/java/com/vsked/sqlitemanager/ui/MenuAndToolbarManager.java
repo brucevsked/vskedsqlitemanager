@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Locale;
 
+import static com.vsked.sqlitemanager.ui.LanguageManager.switchLanguage;
+
 public class MenuAndToolbarManager {
     private static final Logger log = LoggerFactory.getLogger(MenuAndToolbarManager.class);
 
@@ -42,19 +44,19 @@ public class MenuAndToolbarManager {
             //TODO modify this action
             log.info("{}", event);
 
-            VDatabaseFile databaseFile = applicationService.openDataBaseFile(stage);
-
-            setDatabaseService(new DatabaseService(databaseFile));
-
-            TableService tableService = new TableService(getDatabaseService());
-            VTableList vTableList = tableService.getTables();
-            List<VTable> tableList = vTableList.getTables();
-            for (VTable table : tableList) {
-                TreeItem<String> tablesItemNode = new TreeItem<>(table.getTableName().getTableName());
-                tablesItem.getChildren().add(tablesItemNode);
-            }
-
-            tablesItem.setExpanded(true);
+//            VDatabaseFile databaseFile = applicationService.openDataBaseFile(stage);
+//
+//            setDatabaseService(new DatabaseService(databaseFile));
+//
+//            TableService tableService = new TableService(getDatabaseService());
+//            VTableList vTableList = tableService.getTables();
+//            List<VTable> tableList = vTableList.getTables();
+//            for (VTable table : tableList) {
+//                TreeItem<String> tablesItemNode = new TreeItem<>(table.getTableName().getTableName());
+//                tablesItem.getChildren().add(tablesItemNode);
+//            }
+//
+//            tablesItem.setExpanded(true);
 
         });
 
@@ -74,7 +76,7 @@ public class MenuAndToolbarManager {
             if (log.isTraceEnabled()) {
                 log.trace("You click the english menu from menu Item");
             }
-            ApplicationMainUI.switchLanguage(Locale.ENGLISH);
+            switchLanguage(Locale.ENGLISH);
             log.info("{}", event);
         });
 
@@ -82,7 +84,7 @@ public class MenuAndToolbarManager {
             if (log.isTraceEnabled()) {
                 log.trace("You click the chinese menu from menu Item");
             }
-            ApplicationMainUI.switchLanguage(Locale.CHINESE);
+            switchLanguage(Locale.CHINESE);
             log.info("{}", event);
         });
 
