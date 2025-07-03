@@ -12,13 +12,12 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Locale;
-
 import static com.vsked.sqlitemanager.ui.LanguageManager.switchLanguage;
 
 public class MenuAndToolbarManager {
+
     private static final Logger log = LoggerFactory.getLogger(MenuAndToolbarManager.class);
 
     ApplicationMainUI applicationMainUI;
@@ -30,7 +29,7 @@ public class MenuAndToolbarManager {
         this.applicationMainUI = applicationMainUI;
     }
 
-    public MenuBar createMenuBar(Stage stage) {
+    public MenuBar createMenuBar(Stage stage, ApplicationService applicationService, TreeItem<String> tablesItem) {
         MenuBar menuBar = new MenuBar();
         menuBar.setMinWidth(stage.getMaxWidth());
 
@@ -41,22 +40,21 @@ public class MenuAndToolbarManager {
             if (log.isTraceEnabled()) {
                 log.trace("You click the file open menu from menu Item");
             }
-            //TODO modify this action
             log.info("{}", event);
 
-//            VDatabaseFile databaseFile = applicationService.openDataBaseFile(stage);
-//
-//            setDatabaseService(new DatabaseService(databaseFile));
-//
-//            TableService tableService = new TableService(getDatabaseService());
-//            VTableList vTableList = tableService.getTables();
-//            List<VTable> tableList = vTableList.getTables();
-//            for (VTable table : tableList) {
-//                TreeItem<String> tablesItemNode = new TreeItem<>(table.getTableName().getTableName());
-//                tablesItem.getChildren().add(tablesItemNode);
-//            }
-//
-//            tablesItem.setExpanded(true);
+            VDatabaseFile databaseFile = applicationService.openDataBaseFile(stage);
+
+            ApplicationMainUI.databaseService = new DatabaseService(databaseFile);
+
+            TableService tableService = new TableService(ApplicationMainUI.databaseService);
+            VTableList vTableList = tableService.getTables();
+            List<VTable> tableList = vTableList.getTables();
+            for (VTable table : tableList) {
+                TreeItem<String> tablesItemNode = new TreeItem<>(table.getTableName().getTableName());
+                tablesItem.getChildren().add(tablesItemNode);
+            }
+
+            tablesItem.setExpanded(true);
 
         });
 

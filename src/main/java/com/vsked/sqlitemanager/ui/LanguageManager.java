@@ -1,7 +1,6 @@
 package com.vsked.sqlitemanager.ui;
 
 import com.vsked.sqlitemanager.services.I18N;
-
 import java.util.Locale;
 
 public class LanguageManager {

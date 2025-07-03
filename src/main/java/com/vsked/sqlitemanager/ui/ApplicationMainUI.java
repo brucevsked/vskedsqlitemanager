@@ -78,17 +78,13 @@ public class ApplicationMainUI extends Application {
     private GridPane currentQueryGridPane;
 
     private ApplicationService applicationService = new ApplicationService();
-    private DatabaseService databaseService;
+    static DatabaseService databaseService;
 
     public DatabaseService getDatabaseService() {
         return databaseService;
     }
 
     private TreeView<String> systemViewTree; // 类成员变量
-
-    public void setDatabaseService(DatabaseService databaseService) {
-        this.databaseService = databaseService;
-    }
 
     public int getGlobalQueryTabCount() {
         this.globalQueryTabCount = this.globalQueryTabCount + 1;
@@ -569,8 +565,8 @@ public class ApplicationMainUI extends Application {
             log.info("{}", event);
 
             VDatabaseFile databaseFile = applicationService.openDataBaseFile(stage);
+            databaseService = new DatabaseService(databaseFile);
 
-            setDatabaseService(new DatabaseService(databaseFile));
 
             TableService tableService = new TableService(getDatabaseService());
             VTableList vTableList = tableService.getTables();
@@ -638,12 +634,12 @@ public class ApplicationMainUI extends Application {
         dialog.getDialogPane().getButtonTypes().addAll(renameButtonType, ButtonType.CANCEL);
 
         TextField tableNameField = new TextField(oldTableName.getTableName());
-        tableNameField.setPromptText("新表名");
+        tableNameField.setPromptText(I18N.get("newTable.title"));
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.add(new Label("新表名:"), 0, 0);
+        grid.add(new Label(I18N.get("newTable.title")), 0, 0);
         grid.add(tableNameField, 1, 0);
 
         dialog.getDialogPane().setContent(grid);
