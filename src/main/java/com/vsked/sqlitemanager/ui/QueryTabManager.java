@@ -64,7 +64,7 @@ public class QueryTabManager {
                 log.trace("you click cut menu from contextMenu");
             }
             log.info("{}", actionEvent4);
-            applicationMainUI.getCurrentQueryTextArea().cut();
+            ApplicationMainUI.currentQueryTextArea.cut();
         });
 
         copyMenuItem.setOnAction(actionEvent3 -> {
@@ -72,7 +72,7 @@ public class QueryTabManager {
                 log.trace("you click copy menu from contextMenu");
             }
             log.info("{}", actionEvent3);
-            TextArea textArea = applicationMainUI.getCurrentQueryTextArea();
+            TextArea textArea = ApplicationMainUI.currentQueryTextArea;
             if (!textArea.getSelectedText().isEmpty()) {
                 ClipboardContent content = new ClipboardContent();
                 content.putString(textArea.getSelectedText());
@@ -88,7 +88,7 @@ public class QueryTabManager {
                 log.trace("you click paste menu from contextMenu");
             }
             log.info("{}", actionEvent2);
-            applicationMainUI.getCurrentQueryTextArea().paste();
+            ApplicationMainUI.currentQueryTextArea.paste();
         });
 
         selectAllMenuItem.setOnAction(actionEvent1 -> {
@@ -98,7 +98,7 @@ public class QueryTabManager {
             if (log.isDebugEnabled()) {
                 log.debug("{}", actionEvent1.getSource());
             }
-            applicationMainUI.getCurrentQueryTextArea().selectAll();
+            ApplicationMainUI.currentQueryTextArea.selectAll();
         });
 
         contextMenu.getItems().addAll(selectAllMenuItem, runCurrentSelectedSqlMenuItem, cutMenuItem, copyMenuItem, pasteMenuItem);
@@ -164,8 +164,8 @@ public class QueryTabManager {
 
         tab.setOnSelectionChanged(event -> {
             if (tab.isSelected()) {
-                applicationMainUI.setCurrentQueryTextArea(ta);
-                applicationMainUI.setCurrentQueryGridPane(queryTabGridPane);
+                ApplicationMainUI.currentQueryTextArea = ta;
+                ApplicationMainUI.currentQueryGridPane = queryTabGridPane;
                 ta.requestFocus();
             }
         });
@@ -295,12 +295,12 @@ public void showModifyFieldDialog(VTableName tableName, VTableColumn selectedCol
     dialog.setResultConverter(dialogButton -> {
         if (dialogButton == modifyButtonType) {
             return new VTableColumn(
-                selectedColumn.getId(), // 保留原有 ID
+                selectedColumn.getId(), // keep old ID
                 new VTableColumnName(fieldName.getText()),
                 new VTableTableColumnDataType(fieldType.getText()),
                 new VTableColumnNotNull(notNullCheckBox.isSelected()),
-                selectedColumn.getDfltValue(), // 保留默认值
-                selectedColumn.getPk() // 保留主键信息
+                selectedColumn.getDfltValue(), // keep old default value
+                selectedColumn.getPk() // keep primary key
             );
         }
         return null;
@@ -308,7 +308,6 @@ public void showModifyFieldDialog(VTableName tableName, VTableColumn selectedCol
 
     dialog.showAndWait().ifPresent(modifiedColumn -> {
         try {
-            // 调用服务层修改字段
             TableService tableService = new TableService(applicationMainUI.getDatabaseService());
             tableService.modifyColumn(
                 tableName,
@@ -318,10 +317,10 @@ public void showModifyFieldDialog(VTableName tableName, VTableColumn selectedCol
                 modifiedColumn.getNotNull().isNotNull()
             );
 
-            // 更新表格视图
+            //update table view
             int index = items.indexOf(selectedColumn);
             if (index != -1) {
-                items.set(index, modifiedColumn); // 替换旧字段
+                items.set(index, modifiedColumn); // replace old field
             }
 
         } catch (Exception e) {
