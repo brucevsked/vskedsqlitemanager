@@ -107,9 +107,6 @@ public class ApplicationMainUI extends Application {
 
         TreeItem<String> rootItem = I18N.treeItemForKey("tree.system");
 
-        MenuBar menuBar=menuAndToolbarManager.createMenuBar(stage, applicationService, rootItem);
-
-
         GridPane leftGridPane = new GridPane();
 
         TreeItem<String> tablesItem = I18N.treeItemForKey("tree.tables");
@@ -130,6 +127,7 @@ public class ApplicationMainUI extends Application {
         centerGridPane.setMinWidth(stage.getMaxWidth() - leftGridPane.getMaxWidth());
         centerGridPane.setMinHeight(leftGridPane.getMinHeight());
 
+        MenuBar menuBar=menuAndToolbarManager.createMenuBar(stage, applicationService, tablesItem);
 
         TabPane centerTabPane = new TabPane();
 
@@ -137,8 +135,6 @@ public class ApplicationMainUI extends Application {
         GridPane topGridPane = menuAndToolbarManager.createTopGridPane(menuBar, toolbar);
 
         borderPane.setTop(topGridPane);
-        //TODO when change query set current text area component
-
 
         systemViewTree = new TreeView<>(); // 初始化
 
@@ -694,8 +690,8 @@ public class ApplicationMainUI extends Application {
     private void showAddFieldDialog(VTableName tableName, ObservableList<VTableColumn> tableColumns) {
         // 创建对话框
         Dialog<VTableColumn> dialog = new Dialog<>();
-        dialog.setTitle("添加字段 - " + tableName.getTableName());
-        dialog.setHeaderText("请输入新字段的信息");
+        dialog.setTitle(I18N.get("dialog.title.addField")+" - " + tableName.getTableName());
+        dialog.setHeaderText(I18N.get("dialog.header.addFieldInfo"));
 
         // 设置按钮
         ButtonType addButtonType = new ButtonType("添加", ButtonBar.ButtonData.OK_DONE);
