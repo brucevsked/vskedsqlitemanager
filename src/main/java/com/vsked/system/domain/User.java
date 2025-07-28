@@ -6,12 +6,14 @@ public class User {
 
     private UserId id;
     private UserName name;
+    private Set<Account> accounts;
     private Set<Role> roles;
     private Certificate certificate;
 
-    public User(UserId id, UserName name, Set<Role> roles, Certificate certificate) {
+    public User(UserId id, UserName name,Set<Account> accounts, Set<Role> roles, Certificate certificate) {
         this.id = id;
         this.name = name;
+        this.accounts = accounts;
         this.roles = roles;
         this.certificate = certificate;
     }
@@ -21,12 +23,21 @@ public class User {
     public UserName getName() {
         return name;
     }
+
+    public Set<Account> getAccounts() {
+        return accounts;
+    }
+
     public Set<Role> getRoles() {
         return roles;
     }
     public Certificate getCertificate() {
         return certificate;
     }
+    public boolean hasAccount(Account account) {
+        return accounts.contains(account);
+    }
+
     public boolean hasRole(Role role) {
         return roles.contains(role);
     }
