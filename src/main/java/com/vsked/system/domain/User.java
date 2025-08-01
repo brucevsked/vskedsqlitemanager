@@ -8,13 +8,16 @@ public class User {
     private UserName name;
     private Set<Account> accounts;
     private Set<Role> roles;
+    private Department department;
     private Certificate certificate;
 
-    public User(UserId id, UserName name,Set<Account> accounts, Set<Role> roles, Certificate certificate) {
+
+    public User(UserId id, UserName name,Set<Account> accounts, Set<Role> roles, Department  department, Certificate certificate) {
         this.id = id;
         this.name = name;
         this.accounts = accounts;
         this.roles = roles;
+        this.department = department;
         this.certificate = certificate;
     }
     public UserId getId() {
@@ -31,6 +34,11 @@ public class User {
     public Set<Role> getRoles() {
         return roles;
     }
+
+    public Department getDepartment() {
+        return department;
+    }
+
     public Certificate getCertificate() {
         return certificate;
     }
@@ -41,9 +49,11 @@ public class User {
     public boolean hasRole(Role role) {
         return roles.contains(role);
     }
+
     public boolean hasPermission(Permission permission) {
         return roles.stream().anyMatch(role -> role.hasPermission(permission));
     }
+
     public boolean hasCertificate(Certificate certificate) {
         return this.certificate.equals(certificate);
     }
