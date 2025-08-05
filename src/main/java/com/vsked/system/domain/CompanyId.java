@@ -1,9 +1,9 @@
 package com.vsked.system.domain;
 
-public class ResourceAttributeId {
+public class CompanyId {
     private Long id;
 
-    public ResourceAttributeId(Long id) {
+    public CompanyId(Long id) {
         this.id = id;
     }
 

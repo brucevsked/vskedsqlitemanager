@@ -28,6 +28,7 @@ public enum DataType {
     DOUBLE_OBJECT("Double", Double.class),
     CHARACTER("Character", Character.class),
     STRING("String", String.class),
+    OBJECT("Object", Object.class),
 
     // 可选：集合类型
     LIST("List", List.class),

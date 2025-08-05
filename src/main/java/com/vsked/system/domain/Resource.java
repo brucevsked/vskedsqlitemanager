@@ -38,4 +38,8 @@ public class Resource {
     public Set<ResourceAction> getActions() {
         return actions;
     }
+
+    public void addAttribute(ResourceAttribute attribute) {
+        this.attributes.add(attribute);
+    }
 }

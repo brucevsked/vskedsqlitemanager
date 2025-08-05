@@ -1,9 +1,9 @@
 package com.vsked.system.domain;
 
-public class ResourceAttributeName {
+public class CompanyName {
     private String name;
 
-    public ResourceAttributeName(String name) {
+    public CompanyName(String name) {
         this.name = name;
     }
 
