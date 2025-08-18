@@ -4,7 +4,6 @@ import com.vsked.system.domain.Navigation;
 import com.vsked.system.domain.NavigationId;
 import com.vsked.system.domain.NavigationName;
 import com.vsked.system.domain.Page;
-
 import java.util.List;
 
 public interface NavigationRepository {
