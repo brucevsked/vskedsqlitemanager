@@ -19,11 +19,11 @@
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.install.skip>true</maven.install.skip>
-        <mavenCompilerPlugin.version>3.8.1</mavenCompilerPlugin.version>
-        <mavenSurefirePlugin.version>2.22.2</mavenSurefirePlugin.version>
+        <mavenCompilerPlugin.version>3.14.0</mavenCompilerPlugin.version>
+        <mavenSurefirePlugin.version>3.5.3</mavenSurefirePlugin.version>
 
         <log4j.version>2.19.0</log4j.version>
-        <testng.version>7.7.1</testng.version>
+        <testng.version>7.11.0</testng.version>
 
         <sqlitejdbc.version>3.49.0.0</sqlitejdbc.version>
         <javaFx.version>23.0.2</javaFx.version>
@@ -227,6 +227,7 @@
                 <version>${mavenSurefirePlugin.version}</version>
                 <configuration>
                     <skip>true</skip>
+                    <argLine>-javaagent:"${settings.localRepository}/org/mockito/mockito-core/5.14.2/mockito-core-5.14.2.jar"</argLine>
                 </configuration>
             </plugin>
             <plugin>

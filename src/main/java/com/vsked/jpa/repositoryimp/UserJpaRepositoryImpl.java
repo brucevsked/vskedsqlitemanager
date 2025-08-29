@@ -1,6 +1,11 @@
 package com.vsked.jpa.repositoryimp;
 
 
+import com.vsked.jpa.po.RolePo;
+import com.vsked.jpa.po.UserPo;
+import com.vsked.jpa.repository.UserRepositoryJPA;
+import com.vsked.system.domain.Role;
+import com.vsked.system.domain.User;
 import com.vsked.system.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -10,28 +15,24 @@ import java.util.List;
 public class UserJpaRepositoryImpl implements UserRepository {
 
     @Autowired
-    IUserJpaRepository iUserJpaRepository;
+    UserRepositoryJPA userRepositoryJPA;
     @Autowired
     RoleJpaRepositoryImpl roleJpaRepositoryImpl;
-    @Autowired
-    CertificateJpaRepositoryImpl certificateJpaRepositoryImpl;
 
-    @Override
     public User save(User user) {
         UserPo po=userToPo(user);
-        UserPo savePo=iUserJpaRepository.save(po);
+        UserPo savePo=userRepositoryJPA.save(po);
         return poToUser(savePo);
     }
 
-    @Override
+
     public User findByUserName(String name) {
-        UserPo po=iUserJpaRepository.findByName(name).orElse(null);
+        UserPo po=userRepositoryJPA.findByName(name).orElse(null);
         return poToUser(po);
     }
 
-    @Override
     public User findByCertificateId(Long certificateId) {
-        UserPo po=iUserJpaRepository.findByCertificateId(certificateId).orElse(null);
+        UserPo po=userRepositoryJPA.findByCertificateId(certificateId).orElse(null);
         return poToUser(po);
     }
 
@@ -47,8 +48,7 @@ public class UserJpaRepositoryImpl implements UserRepository {
         boolean credentialsNonExpired=po.isCredentialsNonExpired();
         boolean enable=po.isEnable();
         List<Role> roles=roleJpaRepositoryImpl.posToRoles(po.getRoles());
-        Certificate certificate=certificateJpaRepositoryImpl.poToCertificate(po.getCertificate());
-        return new User(id,userName,password,accountNonExpired,accountNonLock,credentialsNonExpired,enable,roles,certificate);
+        return new User(id,userName,password,accountNonExpired,accountNonLock,credentialsNonExpired,enable,roles);
     }
 
     public UserPo userToPo(User user){
@@ -57,17 +57,10 @@ public class UserJpaRepositoryImpl implements UserRepository {
         }
 
         UserPo po=new UserPo();
-        po.setId(user.getId());
-        po.setName(user.getUsername());
-        po.setPassword(user.getPassword());
-        po.setAccountNonExpired(user.isAccountNonExpired());
-        po.setAccountNonLock(user.isAccountNonLocked());
-        po.setCredentialsNonExpired(user.isCredentialsNonExpired());
+        po.setId(user.getId().getId());
+        po.setName(user.getName().getName());
         po.setEnable(user.isEnabled());
         List<RolePo> roles=roleJpaRepositoryImpl.rolesToPos(user.getRoles());
-        CertificatePo certificate=certificateJpaRepositoryImpl.certificateToPo(user.getCertificate());
-        po.setRoles(roles);
-        po.setCertificate(certificate);
         return po;
     }
 }

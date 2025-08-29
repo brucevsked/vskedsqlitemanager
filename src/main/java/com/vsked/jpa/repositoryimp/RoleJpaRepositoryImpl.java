@@ -1,13 +1,11 @@
 package com.vsked.jpa.repositoryimp;
 
-import com.jat.system.model.Menu;
-import com.jat.system.model.Role;
-import com.jat.system.repository.RoleRepository;
-import com.jat.system.repository.jpa.po.MenuPo;
-import com.jat.system.repository.jpa.po.RolePo;
+import com.vsked.jpa.po.MenuPo;
+import com.vsked.jpa.po.RolePo;
+import com.vsked.system.domain.Role;
+import com.vsked.system.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
 import java.util.LinkedList;
 import java.util.List;
 
