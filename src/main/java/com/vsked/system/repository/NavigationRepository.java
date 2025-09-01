@@ -19,6 +19,6 @@ public interface NavigationRepository {
     Navigation getBy(Navigation parentNavigation,NavigationId navigationId,NavigationName navigationName);
     Long nextId();
 
-    Page<Navigation> findAll(Page page);
+    Page<Navigation> findAll(Page<Navigation> page);
 
 }

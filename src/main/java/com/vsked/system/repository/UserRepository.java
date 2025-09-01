@@ -14,6 +14,6 @@ public interface UserRepository {
     User getBy(UserId userId);
     Long nextUserId();
 
-    Page<User> findAll(Page page);
+    Page<User> findAll(Page<User> page);
 
 }

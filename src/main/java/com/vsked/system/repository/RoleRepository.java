@@ -18,5 +18,5 @@ public interface RoleRepository {
     Role getByIdNotAndNameIs(RoleId roleId,RoleName name);
     void save(Role role);
     Long nextRoleId();
-    Page<Role> findAll(Page page);
+    Page<Role> findAll(Page<Role> page);
 }

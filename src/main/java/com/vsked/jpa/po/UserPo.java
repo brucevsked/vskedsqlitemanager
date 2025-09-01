@@ -9,7 +9,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.io.Serializable;
@@ -36,10 +35,6 @@ public class UserPo implements Serializable {
     @OneToMany(cascade = CascadeType.DETACH,fetch = FetchType.LAZY)
     @JoinTable(name = "userRole",joinColumns = {@JoinColumn(name = "userId")},inverseJoinColumns = {@JoinColumn(name = "roleId")})
     private List<RolePo> roles;
-
-//    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
-//    @JoinTable(name = "userCertificate",joinColumns = {@JoinColumn(name = "userId")},inverseJoinColumns = {@JoinColumn(name = "certificateId")})
-//    private CertificatePo certificate;
 
     public UserPo() {
     }
@@ -108,11 +103,4 @@ public class UserPo implements Serializable {
         this.enable = enable;
     }
 
-//    public CertificatePo getCertificate() {
-//        return certificate;
-//    }
-//
-//    public void setCertificate(CertificatePo certificate) {
-//        this.certificate = certificate;
-//    }
 }

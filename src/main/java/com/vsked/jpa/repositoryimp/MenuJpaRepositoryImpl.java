@@ -6,7 +6,6 @@ import com.vsked.system.domain.Navigation;
 import com.vsked.system.repository.NavigationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,7 +24,7 @@ public class MenuJpaRepositoryImpl implements NavigationRepository {
         String url=po.getUrl();
         Navigation parent=poToMenu(po.getParent());
         Integer type=po.getType();
-        return new Navigation(id,name,type,url,parent);
+        return new Navigation(parent,name,url);
     }
 
     public MenuPo menuToPo(Navigation menu){
@@ -33,11 +32,11 @@ public class MenuJpaRepositoryImpl implements NavigationRepository {
             return null;
         }
         MenuPo po=new MenuPo();
-        po.setId(menu.getId());
-        po.setName(menu.getName());
-        po.setUrl(menu.getUrl());
+        po.setId(menu.getId().getId());
+        po.setName(menu.getName().getName());
+        po.setUrl(menu.getAddress().getAddress());
         po.setParent(menuToPo(menu.getParent()));
-        po.setType(menu.getType());
+//        po.setType(menu.get);
         return po;
     }
 
