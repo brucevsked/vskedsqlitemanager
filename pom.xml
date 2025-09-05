@@ -13,6 +13,8 @@
 
     <properties>
 
+        <projectJdk.version>21</projectJdk.version>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -21,6 +23,8 @@
         <maven.install.skip>true</maven.install.skip>
         <mavenCompilerPlugin.version>3.14.0</mavenCompilerPlugin.version>
         <mavenSurefirePlugin.version>3.5.3</mavenSurefirePlugin.version>
+        <mavenJarPlugin.version>3.4.2</mavenJarPlugin.version>
+        <mavenShadePluging.version>3.6.0</mavenShadePluging.version>
 
         <log4j.version>2.19.0</log4j.version>
         <testng.version>7.11.0</testng.version>
@@ -215,8 +219,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${mavenCompilerPlugin.version}</version>
                 <configuration>
-                    <source>21</source>
-                    <target>21</target>
+                    <source>${projectJdk.version}</source>
+                    <target>${projectJdk.version}</target>
+                    <release>${projectJdk.version}</release>
                     <skip>true</skip>
                     <encoding>UTF-8</encoding>
                 </configuration>
@@ -233,7 +238,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.2</version>
+                <version>${mavenJarPlugin.version}</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -246,7 +251,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>${mavenShadePluging.version}</version>
                 <executions>
                     <execution>
                         <id>shade-execution</id>
