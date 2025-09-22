@@ -1,8 +1,8 @@
 package com.vsked.jpa.repositoryjpaimp;
 
-
 import com.vsked.jpa.po.ResourceAttributePO;
 import com.vsked.jpa.repository.ResourceAttributeRepositoryJPA;
+import com.vsked.system.domain.DataType;
 import com.vsked.system.domain.ResourceAttribute;
 import com.vsked.system.domain.ResourceAttributeId;
 import com.vsked.system.domain.ResourceAttributeName;
@@ -44,7 +44,8 @@ public class ResourceAttributeRepositoryImpl implements ResourceAttributeReposit
     public ResourceAttribute poToResourceAttribute(ResourceAttributePO po){
         ResourceAttributeId id=new ResourceAttributeId(po.getId());
         ResourceAttributeName name=new ResourceAttributeName(po.getName());
-        return new ResourceAttribute(id,name);
+        DataType dataType=po.getDataType();
+        return new ResourceAttribute(id,name,dataType);
     }
 
     public ResourceAttributePO resourceAttributeToPo(ResourceAttribute resourceAttribute){

@@ -2,6 +2,7 @@ package com.vsked.jpa.repositoryjpaimp;
 
 import com.vsked.jpa.po.ResourceAttributePO;
 import com.vsked.jpa.po.ResourcePO;
+import com.vsked.jpa.repository.ResourceRepositoryJPA;
 import com.vsked.system.domain.Resource;
 import com.vsked.system.domain.ResourceAttribute;
 import com.vsked.system.domain.ResourceId;
@@ -17,7 +18,7 @@ import java.util.Optional;
 public class ResourceRepositoryImpl implements ResourceRepository {
 
     @Autowired
-    ResourceRepository resourceSpringDataJPARepository;
+    ResourceRepositoryJPA resourceSpringDataJPARepository;
     @Autowired
     ResourceAttributeRepositoryImpl resourceAttributeRepositoryImpl;
 
@@ -69,9 +70,9 @@ public class ResourceRepositoryImpl implements ResourceRepository {
         ResourceName name=new ResourceName(po.getName());
         List<ResourceAttributePO> resourceAttributePOSet=po.getResourceAttributes();
         List<ResourceAttribute> attributeSet=resourceAttributeRepositoryImpl.posToResourceAttributes(resourceAttributePOSet);
-        Resource systemResource=new Resource(id,name);
-        systemResource.addAttributes(attributeSet);
-        return systemResource;
+        Resource resource=new Resource(id,name);
+        resource.addAttributes(attributeSet);
+        return resource;
     }
 
     public ResourcePO resourceToPo(Resource resource){

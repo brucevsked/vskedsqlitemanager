@@ -1,5 +1,6 @@
 package com.vsked.jpa.po;
 
+import com.vsked.system.domain.DataType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -16,6 +17,7 @@ public class ResourceAttributePO implements Serializable {
     @Id
     private Long id;
     private String name;
+    private DataType dataType;
 
     public ResourceAttributePO() {
     }
@@ -41,11 +43,20 @@ public class ResourceAttributePO implements Serializable {
         this.name = name;
     }
 
+    public DataType getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(DataType dataType) {
+        this.dataType = dataType;
+    }
+
     @Override
     public String toString() {
-        return "{" +
+        return "ResourceAttributePO{" +
                 "id=" + id +
-                ", name=" + name  +
-                "}";
+                ", name='" + name + '\'' +
+                ", dataType='" + dataType + '\'' +
+                '}';
     }
 }

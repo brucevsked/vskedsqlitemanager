@@ -11,6 +11,11 @@ public class Resource {
     private Set<ResourceAttribute> attributes;
     private Set<ResourceAction> actions;
 
+    public Resource(ResourceId id, ResourceName name) {
+        this.id = id;
+        this.name = name;
+    }
+
     public Resource(ResourceId id, ResourceName name, ResourceDescription description, Set<ResourceAttribute> attributes, Set<ResourceAction> actions) {
         this.id = id;
         this.name = name;
@@ -41,5 +46,9 @@ public class Resource {
 
     public void addAttribute(ResourceAttribute attribute) {
         this.attributes.add(attribute);
+    }
+
+    public void addAttributes(Set<ResourceAttribute> attributes){
+        this.attributes.addAll(attributes);
     }
 }
