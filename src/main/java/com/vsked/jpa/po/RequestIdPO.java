@@ -6,23 +6,21 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.io.Serializable;
 
-@Table(name = "resourceAttribute")
+@Table(name = "requestId")
 @Entity
-public class ResourceAttributePO implements Serializable {
+public class RequestIdPO implements Serializable {
 
     @Transient
-    private static final long serialVersionUID = -6468949012287221473L;
+    private static final long serialVersionUID = 7407775017516043666L;
 
     @Id
     private Long id;
-    private String name;
 
-    public ResourceAttributePO() {
+    public RequestIdPO() {
     }
 
-    public ResourceAttributePO(Long id, String name) {
+    public RequestIdPO(Long id) {
         this.id = id;
-        this.name = name;
     }
 
     public Long getId() {
@@ -33,19 +31,10 @@ public class ResourceAttributePO implements Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     @Override
     public String toString() {
         return "{" +
                 "id=" + id +
-                ", name=" + name  +
                 "}";
     }
 }

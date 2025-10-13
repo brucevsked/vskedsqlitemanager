@@ -1,7 +1,5 @@
 package com.vsked.jpa.repositoryjpaimp;
 
-import com.vsked.jpa.po.ResourceAttributePO;
-import com.vsked.jpa.po.ResourcePO;
 import com.vsked.jpa.repository.ResourceRepositoryJPA;
 import com.vsked.system.domain.Resource;
 import com.vsked.system.domain.ResourceAttribute;
