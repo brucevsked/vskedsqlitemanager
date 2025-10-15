@@ -10,7 +10,9 @@ public enum AccountType {
     PASSWORD("密码"),
     WECHAT("微信"),
     WORK_WECHAT("企业微信"),
+    SMS("短信"),
     ALIPAY("支付宝");
+
 
     private final String description;
 

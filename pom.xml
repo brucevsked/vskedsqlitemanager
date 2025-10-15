@@ -32,9 +32,10 @@
         <sqlitejdbc.version>3.49.0.0</sqlitejdbc.version>
         <javaFx.version>23.0.2</javaFx.version>
 
-        <springboot.version>3.5.4</springboot.version>
+        <springboot.version>3.5.6</springboot.version>
         <mysqlConnector.version>9.4.0</mysqlConnector.version>
         <jwtapi.verion>0.12.6</jwtapi.verion>
+        <commonslang3.version>3.19.0</commonslang3.version>
         <commonscodec.version>1.18.0</commonscodec.version>
         <jackson.version>2.19.0</jackson.version>
         <jasypt.version>3.0.5</jasypt.version>
@@ -174,6 +175,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commonslang3.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
