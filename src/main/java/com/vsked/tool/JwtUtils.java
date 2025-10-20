@@ -16,17 +16,18 @@ public class JwtUtils {
     private static final Logger log = LoggerFactory.getLogger(JwtUtils.class);
 
     // 密钥（建议使用更安全的随机生成方式，或从配置文件读取）
-    private static final SecretKey SECRET_KEY = Keys.hmacShaKeyFor("yunze521everyonelovethiscompanyyoucanfindsome566666manatofficegood".getBytes());
+    private static final SecretKey SECRET_KEY = Keys.hmacShaKeyFor("yunze666everyonelovethiscompanyyoucanfindsome588888manatofficegood".getBytes());
     private static final long EXPIRATION =  8 * 60 * 60 * 1000; // 8小时的毫秒数;
 
     /**
      * 生成 JWT
      */
-    public static String generateToken(String username,String userId) {
+    public static String generateToken(String username,String userId,String roleId) {
         log.info("generateToken: username={} userId={}", username, userId);
         return Jwts.builder()
                 .subject(username)
                 .claim("userId", userId) // 将用户 ID 放入 Token
+                .claim("roleId", roleId)
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(SECRET_KEY)
                 .compact();
@@ -44,6 +45,13 @@ public class JwtUtils {
      */
     public static String parseUserId(String token) {
         return parseClaims(token).getPayload().get("userId", String.class);
+    }
+
+    /**
+     * 解析角色 ID
+     */
+    public static String parseRoleId(String token) {
+        return parseClaims(token).getPayload().get("roleId", String.class);
     }
 
     /**
