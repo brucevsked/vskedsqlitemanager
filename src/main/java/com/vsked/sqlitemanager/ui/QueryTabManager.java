@@ -1,20 +1,13 @@
 package com.vsked.sqlitemanager.ui;
 
 import com.vsked.sqlitemanager.domain.VTableColumn;
-import com.vsked.sqlitemanager.domain.VTableColumnId;
-import com.vsked.sqlitemanager.domain.VTableColumnName;
-import com.vsked.sqlitemanager.domain.VTableColumnNotNull;
-import com.vsked.sqlitemanager.domain.VTableColumnPk;
-import com.vsked.sqlitemanager.domain.VTableDfltValue;
 import com.vsked.sqlitemanager.domain.VTableName;
-import com.vsked.sqlitemanager.domain.VTableTableColumnDataType;
 import com.vsked.sqlitemanager.services.I18N;
 import com.vsked.sqlitemanager.services.TableService;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.control.TextArea;
@@ -173,162 +166,13 @@ public class QueryTabManager {
         return tab;
     }
 
-public void showAddFieldDialog(VTableName tableName, ObservableList<VTableColumn> items) {
-    Dialog<VTableColumn> dialog = new Dialog<>();
-    dialog.setTitle("添加字段 - " + tableName.getTableName());
-    dialog.setHeaderText("请输入新字段的信息");
+    public void showAddFieldDialog(VTableName tableName, ObservableList<VTableColumn> items) {
+        applicationMainUI.getTableStructureManager().showAddFieldDialog(tableName, items);
+    }
 
-    ButtonType addButtonType = new ButtonType("添加", ButtonBar.ButtonData.OK_DONE);
-    dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
-
-    TextField fieldName = new TextField();
-    fieldName.setPromptText("字段名称");
-
-    TextField fieldType = new TextField();
-    fieldType.setPromptText("数据类型");
-
-    CheckBox notNullCheckBox = new CheckBox("非空");
-
-    GridPane grid = new GridPane();
-    grid.setHgap(10);
-    grid.setVgap(10);
-    grid.add(new Label("字段名称:"), 0, 0);
-    grid.add(fieldName, 1, 0);
-    grid.add(new Label("数据类型:"), 0, 1);
-    grid.add(fieldType, 1, 1);
-    grid.add(notNullCheckBox, 1, 2);
-
-    dialog.getDialogPane().setContent(grid);
-
-    // 初始禁用按钮直到输入有效
-    Node addButton = dialog.getDialogPane().lookupButton(addButtonType);
-    addButton.setDisable(true);
-
-    // 输入验证
-    fieldName.textProperty().addListener((obs, oldVal, newVal) -> {
-        addButton.setDisable(newVal.trim().isEmpty() || fieldType.getText().trim().isEmpty());
-    });
-
-    fieldType.textProperty().addListener((obs, oldVal, newVal) -> {
-        addButton.setDisable(newVal.trim().isEmpty() || fieldName.getText().trim().isEmpty());
-    });
-
-    dialog.setResultConverter(dialogButton -> {
-        if (dialogButton == addButtonType) {
-            return new VTableColumn(
-                    new VTableColumnId(items.size()), // 假设 ID 是当前字段数量
-                    new VTableColumnName(fieldName.getText()),
-                    new VTableTableColumnDataType(fieldType.getText()),
-                    new VTableColumnNotNull(notNullCheckBox.isSelected()),
-                    new VTableDfltValue(null),
-                    new VTableColumnPk(0)
-            );
-        }
-        return null;
-    });
-
-    dialog.showAndWait().ifPresent(newColumn -> {
-        try {
-            // 添加字段到数据库
-            TableService tableService = new TableService(applicationMainUI.getDatabaseService());
-            tableService.addColumn(tableName,
-                                   newColumn.getName().getName(),
-                                   newColumn.getDataType().getDataType(),
-                                   newColumn.getNotNull().isNotNull());
-
-            // 更新表格视图
-            items.add(newColumn);
-        } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "添加字段失败: " + e.getMessage());
-            alert.show();
-        }
-    });
-}
-
-public void showModifyFieldDialog(VTableName tableName, VTableColumn selectedColumn, ObservableList<VTableColumn> items) {
-    Dialog<VTableColumn> dialog = new Dialog<>();
-    dialog.setTitle("修改字段 - " + tableName.getTableName());
-    dialog.setHeaderText("请修改字段的信息");
-
-    ButtonType modifyButtonType = new ButtonType("修改", ButtonBar.ButtonData.OK_DONE);
-    dialog.getDialogPane().getButtonTypes().addAll(modifyButtonType, ButtonType.CANCEL);
-
-    TextField fieldName = new TextField(selectedColumn.getName().getName());
-    fieldName.setPromptText("字段名称");
-
-    TextField fieldType = new TextField(selectedColumn.getDataType().getDataType());
-    fieldType.setPromptText("数据类型");
-
-    CheckBox notNullCheckBox = new CheckBox("非空");
-    notNullCheckBox.setSelected(selectedColumn.getNotNull().isNotNull());
-
-    GridPane grid = new GridPane();
-    grid.setHgap(10);
-    grid.setVgap(10);
-    grid.add(new Label("字段名称:"), 0, 0);
-    grid.add(fieldName, 1, 0);
-    grid.add(new Label("数据类型:"), 0, 1);
-    grid.add(fieldType, 1, 1);
-    grid.add(notNullCheckBox, 1, 2);
-
-    dialog.getDialogPane().setContent(grid);
-
-    // 初始禁用按钮直到输入有效
-    Node modifyButton = dialog.getDialogPane().lookupButton(modifyButtonType);
-    modifyButton.setDisable(true);
-
-    // 输入验证：字段名或类型不能为空
-    fieldName.textProperty().addListener((obs, oldVal, newVal) -> {
-        modifyButton.setDisable(newVal.trim().isEmpty() || fieldType.getText().trim().isEmpty());
-    });
-
-    fieldType.textProperty().addListener((obs, oldVal, newVal) -> {
-        modifyButton.setDisable(newVal.trim().isEmpty() || fieldName.getText().trim().isEmpty());
-    });
-
-    // 设置默认值
-    modifyButton.setDisable(
-        fieldName.getText().trim().isEmpty() || fieldType.getText().trim().isEmpty()
-    );
-
-    // 返回修改后的字段对象
-    dialog.setResultConverter(dialogButton -> {
-        if (dialogButton == modifyButtonType) {
-            return new VTableColumn(
-                selectedColumn.getId(), // keep old ID
-                new VTableColumnName(fieldName.getText()),
-                new VTableTableColumnDataType(fieldType.getText()),
-                new VTableColumnNotNull(notNullCheckBox.isSelected()),
-                selectedColumn.getDfltValue(), // keep old default value
-                selectedColumn.getPk() // keep primary key
-            );
-        }
-        return null;
-    });
-
-    dialog.showAndWait().ifPresent(modifiedColumn -> {
-        try {
-            TableService tableService = new TableService(applicationMainUI.getDatabaseService());
-            tableService.modifyColumn(
-                tableName,
-                selectedColumn.getName().getName(),
-                modifiedColumn.getName().getName(),
-                modifiedColumn.getDataType().getDataType(),
-                modifiedColumn.getNotNull().isNotNull()
-            );
-
-            //update table view
-            int index = items.indexOf(selectedColumn);
-            if (index != -1) {
-                items.set(index, modifiedColumn); // replace old field
-            }
-
-        } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "修改字段失败: " + e.getMessage());
-            alert.show();
-        }
-    });
-}
+    public void showModifyFieldDialog(VTableName tableName, VTableColumn selectedColumn, ObservableList<VTableColumn> items) {
+        applicationMainUI.getTableStructureManager().showModifyFieldDialog(tableName, selectedColumn, items);
+    }
 
 }
 

@@ -64,7 +64,7 @@ public class TreeViewManager {
             TreeItem<String> selectedItem = treeView.getSelectionModel().getSelectedItem();
             if (selectedItem != null && selectedItem.getParent().getValue().equals(I18N.get("tree.tables"))) {
                 VTableName tableName = new VTableName(selectedItem.getValue());
-                applicationMainUI.showEditTableStructureDialog(tableName);
+                applicationMainUI.getTableStructureManager().showEditTableStructureDialog(tableName);
             }
         });
         tableContextMenu.getItems().add(editTableStructureMenuItem);

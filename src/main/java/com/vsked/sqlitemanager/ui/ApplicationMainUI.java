@@ -1,6 +1,5 @@
 package com.vsked.sqlitemanager.ui;
 
-import com.vsked.sqlitemanager.domain.SqliteDataType;
 import com.vsked.sqlitemanager.domain.VTableColumnId;
 import com.vsked.sqlitemanager.domain.VTableColumnName;
 import com.vsked.sqlitemanager.domain.VTableColumnNotNull;
@@ -25,7 +24,6 @@ import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
@@ -44,8 +42,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -64,6 +60,11 @@ public class ApplicationMainUI extends Application {
     private static final Logger log = LoggerFactory.getLogger(ApplicationMainUI.class);
 
     MenuAndToolbarManager menuAndToolbarManager;
+    TableStructureManager tableStructureManager;
+
+    public TableStructureManager getTableStructureManager() {
+        return tableStructureManager;
+    }
 
     private Scene scene;
     private static int globalQueryTabCount = 0;
@@ -104,6 +105,7 @@ public class ApplicationMainUI extends Application {
         BorderPane borderPane = new BorderPane();
 
         menuAndToolbarManager=new MenuAndToolbarManager(this);
+        tableStructureManager = new TableStructureManager(this);
 
         TreeItem<String> rootItem = I18N.treeItemForKey("tree.system");
 
@@ -276,7 +278,7 @@ public class ApplicationMainUI extends Application {
             TreeItem<String> selectedItem = systemViewTree.getSelectionModel().getSelectedItem();
             if (selectedItem != null && selectedItem.getParent().getValue().equals(tablesItem.getValue())) {
                 VTableName tableName = new VTableName(selectedItem.getValue());
-                showEditTableStructureDialog(tableName);
+                tableStructureManager.showEditTableStructureDialog(tableName);
             }
         });
         tableContextMenu.getItems().add(editTableStructureMenuItem);
@@ -380,100 +382,6 @@ public class ApplicationMainUI extends Application {
         });
     }
 
-    void showEditTableStructureDialog(VTableName tableName) {
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("编辑表结构 - " + tableName.getTableName());
-
-        TableService tableService = new TableService(getDatabaseService());
-        List<VTableColumn> tableColumns = tableService.getColumns(tableName);
-
-        // 创建 TableView 显示字段信息
-        TableView<VTableColumn> tableStructureView = new TableView<>();
-        TableColumn<VTableColumn, String> columnNameCol = new TableColumn<>("字段名称");
-        columnNameCol.setCellValueFactory(param -> param.getValue().getName().getNameProperty());
-
-        TableColumn<VTableColumn, String> columnTypeCol = new TableColumn<>("数据类型");
-        columnTypeCol.setCellValueFactory(param -> param.getValue().getDataType().getDataTypeProperty());
-        columnTypeCol.setCellFactory(ComboBoxTableCell.forTableColumn(FXCollections.observableArrayList(SqliteDataType.TYPES)));
-
-        columnTypeCol.setOnEditCommit(event -> {
-            VTableColumn row = event.getRowValue();
-            row.getDataType().setDataType(event.getNewValue());
-        });
-
-        TableColumn<VTableColumn, Boolean> notNullCol = new TableColumn<>("非空");
-        notNullCol.setCellValueFactory(param -> param.getValue().getNotNull().isNotNullProperty());
-        notNullCol.setCellFactory(CheckBoxTableCell.forTableColumn(notNullCol));
-        notNullCol.setEditable(true);
-
-        notNullCol.setOnEditCommit(event -> {
-            VTableColumn row = event.getRowValue();
-            row.getNotNull().setNotNull(event.getNewValue());
-        });
-
-        tableStructureView.getColumns().addAll(columnNameCol, columnTypeCol, notNullCol);
-
-        ObservableList<VTableColumn> observableColumns = FXCollections.observableArrayList(tableColumns);
-        tableStructureView.setItems(observableColumns);
-
-        tableStructureView.setEditable(true);
-
-
-        Button addButton = I18N.buttonForKey("button.addField");
-        addButton.setOnAction(event -> {
-            showAddFieldDialog(tableName, tableStructureView.getItems());
-        });
-
-        Button modifyButton = I18N.buttonForKey("button.editField");
-        modifyButton.setOnAction(event -> {
-            VTableColumn selectedColumn = tableStructureView.getSelectionModel().getSelectedItem();
-            if (selectedColumn == null) {
-                Alert alert = I18N.alertOnlyContentForKey(Alert.AlertType.WARNING, "alert.pleaseSelectField");
-                alert.show();
-                return;
-            }
-            showModifyFieldDialog(tableName, selectedColumn, tableStructureView.getItems());
-        });
-
-        Button deleteButton = I18N.buttonForKey("button.deleteField");
-        deleteButton.setOnAction(event -> {
-            VTableColumn selectedColumn = tableStructureView.getSelectionModel().getSelectedItem();
-            if (selectedColumn == null) {
-                Alert alert = I18N.alertOnlyContentForKey(Alert.AlertType.WARNING, "alert.pleaseSelectField");
-                alert.show();
-                return;
-            }
-            try {
-                deleteField(tableName, selectedColumn.getName().getName(), tableStructureView.getItems());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        Button saveButton = I18N.buttonForKey("button.saveChange");
-        saveButton.setOnAction(event -> {
-            try {
-                saveTableChanges(tableName, tableStructureView.getItems());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-            dialog.close();
-        });
-
-        // 布局
-        GridPane gridPane = new GridPane();
-        gridPane.setHgap(10);
-        gridPane.setVgap(10);
-        gridPane.add(tableStructureView, 0, 0, 4, 1);
-        gridPane.add(addButton, 0, 1);
-        gridPane.add(modifyButton, 1, 1);
-        gridPane.add(deleteButton, 2, 1);
-        gridPane.add(saveButton, 3, 1);
-
-        dialog.getDialogPane().setContent(gridPane);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
-        dialog.show();
-    }
 
     void showAddTableDialog() {
         Dialog<String> dialog = new Dialog<>();
